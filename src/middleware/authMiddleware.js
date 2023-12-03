@@ -23,17 +23,14 @@ const authMiddleWare = (req, res, next) => {
 };
 
 const authUserMiddleWare = (req, res, next) => {
-  const token = req.headers.token.split(" ")[1];
+  // const token = req.headers.token.split(" ")[1];
   const userId = req.params.id;
-  console.log("adasdsad", req.headers.token, "sad", userId);
+  console.log("adasdsad", req.query.token, "sad", userId);
 
-  jwt.verify(req.headers.token, process.env.ACCESS_TOKEN, function (err, user) {
+  jwt.verify(req.query.token, process.env.ACCESS_TOKEN, function (err, user) {
     if (err) {
-      console.log(err, "asdasd,", req.headers.token);
-      return res.status(404).json({
-        message: "The authemtication",
-        status: "ERROR",
-      });
+      // console.log(err, "asdasd,", req.headers.token);
+      return res.json(false);
     }
     if (user?.isAdmin || user?.id === userId) {
       next();
