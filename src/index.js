@@ -26,12 +26,12 @@ app.get("/", (req, res) => {
 mongoose
   .connect(process.env.MONGO_DB)
   .then(() => {
-    console.log("connect success");
+    //console.log("connect success");
   })
   .catch((err) => {
-    console.log(err);
+    //console.log(err);
   });
 
 app.listen(port, () => {
-  console.log("Server is running in port:  ", +port);
+  //console.log("Server is running in port:  ", +port);
 });

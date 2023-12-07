@@ -15,6 +15,7 @@ const createUser = (newUser) => {
           status: "ERR",
           message: "The email is already",
         });
+        return;
       }
       const hash = bcrypt.hashSync(`${password}`, 10);
       const createdUser = await User.create({
@@ -54,7 +55,7 @@ const loginUser = (userLogin) => {
         `${password}`,
         `${checkUser.password}`
       );
-      console.log(`${password}`, `${checkUser.password}`, comparePassword);
+      //console.log(`${password}`, `${checkUser.password}`, comparePassword);
 
       if (!comparePassword) {
         resolve({
@@ -75,6 +76,7 @@ const loginUser = (userLogin) => {
       resolve({
         status: "OK",
         message: "SUCCESS",
+        id: checkUser.id,
         access_token,
         refresh_token,
       });
@@ -96,7 +98,7 @@ const updateUser = (id, data) => {
           message: "The user is not defined",
         });
       }
-      console.log("id,dât", id, data);
+      //console.log("id,dât", id, data);
       const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
       resolve({
         status: "OK",
@@ -133,19 +135,19 @@ const deleteUser = (id) => {
   });
 };
 
-// const deleteManyUser = (ids) => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       await User.deleteMany({ _id: ids });
-//       resolve({
-//         status: "OK",
-//         message: "Delete user success",
-//       });
-//     } catch (e) {
-//       reject(e);
-//     }
-//   });
-// };
+const deleteManyUser = (ids) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await User.deleteMany({ _id: ids });
+      resolve({
+        status: "OK",
+        message: "Delete user success",
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const getAllUser = () => {
   return new Promise(async (resolve, reject) => {
@@ -192,5 +194,5 @@ module.exports = {
   deleteUser,
   getAllUser,
   getDetailsUser,
-  //   deleteManyUser,
+  deleteManyUser,
 };
