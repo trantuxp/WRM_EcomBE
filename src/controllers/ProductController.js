@@ -114,15 +114,14 @@ const deleteMany = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    // const { limit, page, sort, filter } = req.body;
-    const response1 = await ProductService
-      .getAllProductS
-      // Number(limit) || null,
-      // Number(page) || 0,
-      // sort || null,
-      // filter || null
-      ();
-    // //console.log(req.body);
+    const { limit, page, sort, filter } = req.query;
+    const response1 = await ProductService.getAllProductS(
+      Number(limit) || null,
+      Number(page) || 0,
+      sort || null,
+      filter || null
+    );
+    console.log("ádasd", req.query, Number(limit));
 
     return res.status(200).json(response1);
   } catch (e) {
