@@ -1,48 +1,33 @@
-const Product = require("../models/ProductModel");
+const Post = require("../models/PostModel");
 
-const createProduct = (newProduct) => {
+const createPost = (newPost) => {
   return new Promise(async (resolve, reject) => {
-    // //console.log("newProduct", newProduct);
+    // //console.log("newPost", newPost);
 
-    const {
-      name,
-      image,
-      type,
-      countInStock,
-      price,
-      rating,
-      description,
-      discount,
-      idstore,
-    } = newProduct;
+    const { title, content, image, idStore } = newPost;
 
     try {
-      const checkProduct = await Product.findOne({
-        name: name,
+      const checkPost = await Post.findOne({
+        title: title,
       });
-      if (checkProduct !== null) {
+      if (checkPost !== null) {
         resolve({
           status: "ERR",
-          message: "The name of product is already",
+          message: "The name of Post is already",
         });
         return;
       }
-      const newProduct = await Product.create({
-        name,
+      const newPost = await Post.create({
+        title,
+        content,
         image,
-        type,
-        countInStock: Number(countInStock),
-        price,
-        rating,
-        description,
-        discount: Number(discount),
-        idstore,
+        idStore,
       });
-      if (newProduct) {
+      if (newPost) {
         resolve({
           status: "OK",
           message: "SUCCESS",
-          data: newProduct,
+          data: newPost,
         });
       }
     } catch (e) {
@@ -51,26 +36,26 @@ const createProduct = (newProduct) => {
   });
 };
 
-const updateProduct = (id, data) => {
+const updatePost = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkProduct = await Product.findOne({
+      const checkPost = await Post.findOne({
         _id: id,
       });
-      if (checkProduct === null) {
+      if (checkPost === null) {
         resolve({
           status: "ERR",
-          message: "The product is not defined",
+          message: "The Post is not defined",
         });
       }
 
-      const updatedProduct = await Product.findByIdAndUpdate(id, data, {
+      const updatedPost = await Post.findByIdAndUpdate(id, data, {
         new: true,
       });
       resolve({
         status: "OK",
         message: "SUCCESS",
-        data: updatedProduct,
+        data: updatedPost,
       });
     } catch (e) {
       reject(e);
@@ -78,23 +63,23 @@ const updateProduct = (id, data) => {
   });
 };
 
-const deleteProduct = (id) => {
+const deletePost = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkProduct = await Product.findOne({
+      const checkPost = await Post.findOne({
         _id: id,
       });
-      if (checkProduct === null) {
+      if (checkPost === null) {
         resolve({
           status: "ERR",
-          message: "The product is not defined",
+          message: "The Post is not defined",
         });
       }
 
-      await Product.findByIdAndDelete(id);
+      await Post.findByIdAndDelete(id);
       resolve({
         status: "OK",
-        message: "Delete product success",
+        message: "Delete Post success",
       });
     } catch (e) {
       reject(e);
@@ -102,13 +87,13 @@ const deleteProduct = (id) => {
   });
 };
 
-const deleteManyProduct = (ids) => {
+const deleteManyPost = (ids) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await Product.deleteMany({ _id: ids });
+      await Post.deleteMany({ _id: ids });
       resolve({
         status: "OK",
-        message: "Delete product success",
+        message: "Delete Post success",
       });
     } catch (e) {
       reject(e);
@@ -116,24 +101,24 @@ const deleteManyProduct = (ids) => {
   });
 };
 
-const getDetailsProduct = (id) => {
+const getDetailsPostSv = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const product = await Product.findOne({
+      const Post = await Post.findById({
         _id: id,
       });
-      console.log("product", id);
-      if (product === null) {
+      console.log("vo");
+      if (Post === null) {
         resolve({
           status: "ERR",
-          message: "The product is not defined",
+          message: "The Post is not defined",
         });
       }
 
       resolve({
         status: "OK",
         message: "SUCESS",
-        data: product,
+        data: Post,
       });
     } catch (e) {
       reject(e);
@@ -141,38 +126,38 @@ const getDetailsProduct = (id) => {
   });
 };
 
-const getAllProductS = (limit, page, sort, filter) => {
+const getAllPostS = (limit, page, sort, filter) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const totalProduct = await Product.countDocuments();
+      const totalPost = await Post.countDocuments();
 
-      let allProduct = [];
+      let allPost = [];
 
       if (filter) {
         const label = filter[0];
-        const TotalallObjectFilter = await Product.find({
+        const TotalallObjectFilter = await Post.find({
           [label]: { $regex: filter[1] },
         });
-        const allObjectFilter = await Product.find({
+        const allObjectFilter = await Post.find({
           [label]: { $regex: filter[1] },
         })
           .limit(limit)
           .skip(page * limit)
           .sort({ createdAt: -1, updatedAt: -1 });
-        const totalProductFilter = TotalallObjectFilter.length;
+        const totalPostFilter = TotalallObjectFilter.length;
         resolve({
           status: "OK",
           message: "Success",
           data: allObjectFilter,
-          total: totalProductFilter,
+          total: totalPostFilter,
           pageCurrent: Number(page + 1),
-          totalPage: Math.ceil(totalProductFilter / limit),
+          totalPage: Math.ceil(totalPostFilter / limit),
         });
       }
       if (sort) {
         const objectSort = {};
         objectSort[sort[1]] = sort[0];
-        const allProductSort = await Product.find()
+        const allPostSort = await Post.find()
           .limit(limit)
           .skip(page * limit)
           .sort(objectSort)
@@ -180,19 +165,19 @@ const getAllProductS = (limit, page, sort, filter) => {
         resolve({
           status: "OK",
           message: "Success",
-          data: allProductSort,
-          total: totalProduct,
+          data: allPostSort,
+          total: totalPost,
           pageCurrent: Number(page + 1),
-          totalPage: Math.ceil(totalProduct / limit),
+          totalPage: Math.ceil(totalPost / limit),
         });
       }
       if (!limit) {
-        allProduct = await Product.find().sort({
+        allPost = await Post.find().sort({
           createdAt: -1,
           updatedAt: -1,
         });
       } else {
-        allProduct = await Product.find()
+        allPost = await Post.find()
           .limit(limit)
           .skip(page * limit)
           .sort({ createdAt: -1, updatedAt: -1 });
@@ -201,10 +186,10 @@ const getAllProductS = (limit, page, sort, filter) => {
       resolve({
         status: "OK",
         message: "Success",
-        data: allProduct,
-        total: totalProduct,
+        data: allPost,
+        total: totalPost,
         pageCurrent: Number(page + 1),
-        totalPage: Math.ceil(totalProduct / limit),
+        totalPage: Math.ceil(totalPost / limit),
       });
     } catch (e) {
       reject(e);
@@ -212,14 +197,18 @@ const getAllProductS = (limit, page, sort, filter) => {
   });
 };
 
-const getAllType = () => {
+const getAllPostByStoreSv = (StoreId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const allType = await Product.distinct("type");
+      const AllPostByStoreSv = await Post.find({
+        idStore: StoreId,
+      });
+      console.log(" looi");
+
       resolve({
         status: "OK",
         message: "Success",
-        data: allType,
+        data: AllPostByStoreSv,
       });
     } catch (e) {
       reject(e);
@@ -228,11 +217,11 @@ const getAllType = () => {
 };
 
 module.exports = {
-  createProduct,
-  updateProduct,
-  getDetailsProduct,
-  deleteProduct,
-  getAllProductS,
-  deleteManyProduct,
-  getAllType,
+  createPost,
+  updatePost,
+  getDetailsPostSv,
+  deletePost,
+  getAllPostS,
+  deleteManyPost,
+  getAllPostByStoreSv,
 };

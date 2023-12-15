@@ -1,7 +1,8 @@
 const UserRouter = require("./UserRouter");
 const ProductRouter = require("./ProductRouter");
+const PostRouter = require("./PostRouter");
 const StoreRouter = require("./StoreRouter");
-// const OrderRouter = require('./OrderRouter')
+const OrderRouter = require("./OrderRouter");
 // const PaymentRouter = require('./PaymentRouter')
 
 const routes = (app) => {
@@ -11,8 +12,9 @@ const routes = (app) => {
   // });
 
   app.use("/api/product", ProductRouter);
+  app.use("/api/post", PostRouter);
   app.use("/api/store", StoreRouter);
-  // app.use('/api/order', OrderRouter)
+  app.use("/api/order", OrderRouter);
   // app.use('/api/payment', PaymentRouter)
 };
 

@@ -30,7 +30,26 @@ const createStore = async (req, res) => {
     res.send("ERR");
   }
 };
+const getDetailsStore = async (req, res) => {
+  try {
+    const id = req.params.id.toString();
+    console.log("storeId", id);
+    if (!id) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The storeId is required",
+      });
+    }
+    const response = await StoreService.getDetailsStoreSv(id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: "asd",
+    });
+  }
+};
 
 module.exports = {
   createStore,
+  getDetailsStore,
 };

@@ -1,47 +1,17 @@
-const ProductService = require("../services/ProductService");
+const PostService = require("../services/PostService");
 
-const createProduct = async (req, res) => {
+const createPost = async (req, res) => {
   try {
-    const {
-      name,
-      image,
-      type,
-      countInStock,
-      price,
-      rating,
-      description,
-      discount,
-      idstore,
-    } = req.body;
+    const { title, content, image, idStore } = req.body;
 
-    if (
-      !name ||
-      !image ||
-      !type ||
-      !countInStock ||
-      !price ||
-      !rating ||
-      !discount ||
-      !idstore
-    ) {
-      console.log(
-        "ádsa",
-        name,
-        image,
-        type,
-        countInStock,
-        price,
-        rating,
-        description,
-        discount,
-        idstore
-      );
+    if (!title || !content || !image || !idStore) {
+      console.log("post", title, content, image, idStore);
       return res.status(200).json({
         status: "ERR",
         message: "The input is required",
       });
     }
-    const response = await ProductService.createProduct(req.body);
+    const response = await PostService.createPost(req.body);
 
     return res.status(200).json(response);
   } catch (e) {
@@ -53,17 +23,17 @@ const createProduct = async (req, res) => {
   }
 };
 
-const updateProduct = async (req, res) => {
+const updatePost = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const PostId = req.params.id;
     const data = req.body;
-    if (!productId) {
+    if (!PostId) {
       return res.status(200).json({
         status: "ERR",
-        message: "The productId is required",
+        message: "The PostId is required",
       });
     }
-    const response = await ProductService.updateProduct(productId, data);
+    const response = await PostService.updatePost(PostId, data);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -72,16 +42,17 @@ const updateProduct = async (req, res) => {
   }
 };
 
-const getDetailsProduct = async (req, res) => {
+const getDetailsPost = async (req, res) => {
   try {
-    const productId = req.params.id;
-    if (!productId) {
+    const id = req.params.id;
+    if (!id) {
       return res.status(200).json({
         status: "ERR",
-        message: "The productId is required",
+        message: "The PostId is required",
       });
     }
-    const response = await ProductService.getDetailsProduct(productId);
+
+    const response = await PostService.getDetailsPostSv(id);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -90,16 +61,16 @@ const getDetailsProduct = async (req, res) => {
   }
 };
 
-const deleteProduct = async (req, res) => {
+const deletePost = async (req, res) => {
   try {
-    const productId = req.params.id;
-    if (!productId) {
+    const PostId = req.params.id;
+    if (!PostId) {
       return res.status(200).json({
         status: "ERR",
-        message: "The productId is required",
+        message: "The PostId is required",
       });
     }
-    const response = await ProductService.deleteProduct(productId);
+    const response = await PostService.deletePost(PostId);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -117,7 +88,7 @@ const deleteMany = async (req, res) => {
         message: "The ids is required",
       });
     }
-    const response = await ProductService.deleteManyProduct(ids);
+    const response = await PostService.deleteManyPost(ids);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -126,10 +97,10 @@ const deleteMany = async (req, res) => {
   }
 };
 
-const getAllProduct = async (req, res) => {
+const getAllPost = async (req, res) => {
   try {
     const { limit, page, sort, filter } = req.query;
-    const response1 = await ProductService.getAllProductS(
+    const response1 = await PostService.getAllPostS(
       Number(limit) || null,
       Number(page) || 0,
       sort || null,
@@ -145,10 +116,14 @@ const getAllProduct = async (req, res) => {
   }
 };
 
-const getAllType = async (req, res) => {
+const getAllPostByStore = async (req, res) => {
   try {
-    const response = await ProductService.getAllType();
-    return res.status(200).json(response);
+    const StoreId = req.params.id.toString();
+    const response1 = await PostService.getAllPostByStoreSv(StoreId);
+    // console.log("ádasd", req.query, Number(limit));
+    console.log("StoreId", StoreId);
+
+    return res.status(200).json(response1);
   } catch (e) {
     return res.status(404).json({
       message: e,
@@ -157,11 +132,11 @@ const getAllType = async (req, res) => {
 };
 
 module.exports = {
-  createProduct,
-  updateProduct,
-  getDetailsProduct,
-  deleteProduct,
-  getAllProduct,
+  createPost,
+  updatePost,
+  getDetailsPost,
+  deletePost,
+  getAllPost,
   deleteMany,
-  getAllType,
+  getAllPostByStore,
 };

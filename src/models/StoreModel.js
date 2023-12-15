@@ -4,6 +4,7 @@ const storeSchema = new mongoose.Schema(
     nameStore: { type: String },
     addressStore: { type: String, required: true },
     avatarStore: { type: String },
+    idUser: { type: String, required: true },
   },
   {
     timestamps: true,

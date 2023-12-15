@@ -1,10 +1,10 @@
 const Store = require("../models/StoreModel");
 const User = require("../models/UserModel");
-const bcrypt = require("bcrypt");
 
 const createStore = (id, newStore) => {
   return new Promise(async (resolve, reject) => {
     const { nameStore, addressStore, avatarStore } = newStore;
+    const idUser = id;
     try {
       const checkStore = await Store.findOne({
         nameStore: nameStore,
@@ -13,7 +13,7 @@ const createStore = (id, newStore) => {
       if (checkStore !== null) {
         resolve({
           status: "ERR",
-          message: "The email is already",
+          message: "The Store name is already",
         });
         return;
       }
@@ -22,7 +22,9 @@ const createStore = (id, newStore) => {
         nameStore,
         addressStore,
         avatarStore,
+        idUser,
       });
+
       if (createdStore) {
         resolve({
           status: "OK",
@@ -62,7 +64,33 @@ const createStore = (id, newStore) => {
     }
   });
 };
+const getDetailsStoreSv = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const store = await Store.findOne({
+        idUser: id,
+      });
+      console.log("store", store);
+
+      if (store === null) {
+        resolve({
+          status: "ERR",
+          message: "The store is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "SUCESS",
+        data: store,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 module.exports = {
   createStore,
+  getDetailsStoreSv,
 };
