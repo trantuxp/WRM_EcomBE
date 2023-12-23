@@ -104,11 +104,11 @@ const deleteManyPost = (ids) => {
 const getDetailsPostSv = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const Post = await Post.findById({
+      const post = await Post.findOne({
         _id: id,
       });
       console.log("vo");
-      if (Post === null) {
+      if (post === null) {
         resolve({
           status: "ERR",
           message: "The Post is not defined",
@@ -118,7 +118,7 @@ const getDetailsPostSv = (id) => {
       resolve({
         status: "OK",
         message: "SUCESS",
-        data: Post,
+        data: post,
       });
     } catch (e) {
       reject(e);

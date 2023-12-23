@@ -44,7 +44,7 @@ const updatePost = async (req, res) => {
 
 const getDetailsPost = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req.params.id.toString();
     if (!id) {
       return res.status(200).json({
         status: "ERR",
