@@ -1,4 +1,5 @@
 const Evaluate = require("../models/EvaluateModel");
+const Product = require("../models/ProductModel");
 
 const createEvaluate = (newEvaluate) => {
   return new Promise(async (resolve, reject) => {
@@ -66,17 +67,55 @@ const updateEvaluate = (id, data) => {
 const getAllByStore = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const allEvaluate = await Evaluate.find().sort({
-        createdAt: -1,
-        updatedAt: -1,
+      const evaluate = await Evaluate.aggregate([
+        {
+          $lookup: {
+            from: "products",
+            localField: "idItem",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+      ]);
+
+      let EvaluateByStore = evaluate.map(async (eva) => {
+        if (eva.product[0].idStore !== id) {
+          return 0;
+        } else {
+          return {
+            _id: eva._id,
+            idItem: eva.idItem,
+            idUser: eva.idUser,
+            idOrder: eva.idOrder,
+            content: eva.content,
+            star: eva.star,
+            product: eva.product,
+            createdAt: eva.createdAt,
+            updatedAt: eva.updatedAt,
+          };
+        }
       });
-      resolve({
-        status: "OK",
-        message: "Success",
-        data: allEvaluate,
-      });
+      console.log("id", id);
+
+      if (EvaluateByStore === null) {
+        resolve({
+          status: "ERR",
+          message: "The Cart is not defined",
+        });
+      } else {
+        resolve(await Promise.all(EvaluateByStore));
+      }
+      // const allEvaluate = await Evaluate.find().sort({
+      //   createdAt: -1,
+      //   updatedAt: -1,
+      // });
+      // resolve({
+      //   status: "OK",
+      //   message: "Success",
+      //   data: evaluate,
+      // });
     } catch (e) {
-      reject(e);
+      reject("loi");
     }
   });
 };

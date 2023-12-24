@@ -86,81 +86,32 @@ const updateCart = (id, newAmount) => {
 const getAllByUser = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      // const CartByUser = await Product.findOne(
-      //   { idstore: id },
-      //   function (err, product) {
-      //     if (err) {
-      //       console.log(
-      //         "Error occurred while querying products collection",
-      //         err
-      //       );
+      const cartByUser = await Cart.find({
+        idUser: id,
+      });
 
-      //       return;
-      //     }
+      let cartByUsers = cartByUser.map(async (pro) => {
+        const proByUser = await Product.findOne({ _id: pro.idItem });
+        return {
+          _id: pro._id,
+          idItem: pro.idItem,
+          amount: pro.amount,
+          totalPrice: pro.totalPrice,
+          product: proByUser,
+          idUser: pro.idUser,
+          createdAt: pro.createdAt,
+          updatedAt: pro.updatedAt,
+        };
+      });
 
-      //     if (product) {
-      //       console.log(product);
-      //       Cart.find({ idItem: product._id }).toArray(function (err, cart) {
-      //         if (err) {
-      //           console.log(
-      //             "Error occurred while querying orders collection",
-      //             err
-      //           );
-
-      //           return;
-      //         }
-
-      //         console.log(cart);
-      //         return cart;
-      //       });
-      //     } else {
-      //       console.log("No product found with the specified name");
-      //     }
-      //   }
-      // );
-
-      // const cart = await Cart.query({
-      //   idUser: id,
-      // });
-
-      const cart = await Cart.aggregate([
-        {
-          $lookup: {
-            from: "products",
-            localField: "idItem",
-            foreignField: "_id",
-            as: "orderdetails",
-          },
-        },
-      ]);
-      console.log("idUser", id);
-
-      // const cartByStore = cart.data;
-      // if (cartByStore === null) {
-      //   resolve({
-      //     status: "ERR",
-      //     message: "The Cart is not defined",
-      //   });
-      // } else {
-      //   resolve({
-      //     status: "OK",
-      //     message: "SUCESS",
-      //     data: cartByStore,
-      //   });
-      // }
-
-      if (cart === null) {
+      if (cartByUser === null) {
         resolve({
           status: "ERR",
           message: "The Cart is not defined",
         });
+      } else {
+        resolve(await Promise.all(cartByUsers));
       }
-
-      resolve({
-        status: "OK",
-        message: "SUCESS",
-        data: cart,
-      });
     } catch (e) {
       reject(e);
     }

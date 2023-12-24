@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema(
     description: { type: String },
     discount: { type: Number },
     selled: { type: Number },
-    idstore: { type: String, required: true },
+    idStore: { type: String, required: true },
   },
   {
     timestamps: true,
