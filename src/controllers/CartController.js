@@ -21,15 +21,15 @@ const createCart = async (req, res) => {
 const updateCart = async (req, res) => {
   try {
     const cartId = req.params.id;
-    const { amount } = req.body;
+    const { amount, iduser } = req.query;
     if (!cartId) {
       return res.status(200).json({
         status: "ERR",
         message: "The cartId is required",
       });
     }
-    console.log("cartId, amount", cartId, amount);
-    const response = await CartService.updateCart(cartId, amount);
+    // console.log("cartId, amount", cartId, amount);
+    const response = await CartService.updateCart(cartId, amount, iduser);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -48,7 +48,7 @@ const getAllByUser = async (req, res) => {
       });
     }
     const response = await CartService.getAllByUser(userId);
-    return res.status(200).json(response);
+    return res.status(200).send(response);
   } catch (e) {
     return res.status(404).json({
       message: e,
@@ -58,13 +58,15 @@ const getAllByUser = async (req, res) => {
 const deleteCart = async (req, res) => {
   try {
     const cartId = req.params.id;
+    const { iduser } = req.query;
+
     if (!cartId) {
       return res.status(200).json({
         status: "ERR",
         message: "The productId is required",
       });
     }
-    const response = await CartService.deleteCart(cartId);
+    const response = await CartService.deleteCart(cartId, iduser);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({

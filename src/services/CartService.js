@@ -37,12 +37,15 @@ const createCart = (newCart) => {
     }
   });
 };
-const updateCart = (id, newAmount) => {
+const updateCart = (id, newAmount, iduser) => {
   return new Promise(async (resolve, reject) => {
     try {
       const checkCart = await Cart.findOne({
-        _id: id,
+        idItem: id,
+        idUser: iduser,
       });
+      console.log("amount, cartid", newAmount, id, iduser);
+
       if (checkCart === null) {
         resolve({
           status: "ERR",
@@ -52,7 +55,7 @@ const updateCart = (id, newAmount) => {
 
       if (newAmount) {
         const updatedCart = await Cart.findByIdAndUpdate(
-          id,
+          checkCart._id,
           { amount: newAmount },
           {
             new: true,
@@ -90,8 +93,8 @@ const getAllByUser = (id) => {
         idUser: id,
       });
 
-      let cartByUsers = cartByUser.map(async (pro) => {
-        const proByUser = await Product.findOne({ _id: pro.idItem });
+      const cartByUsers = cartByUser.map(async (pro) => {
+        const proByUser = await Product.find({ _id: pro.idItem });
         return {
           _id: pro._id,
           idItem: pro.idItem,
@@ -104,13 +107,18 @@ const getAllByUser = (id) => {
         };
       });
 
-      if (cartByUser === null) {
+      if (cartByUsers === null) {
         resolve({
           status: "ERR",
           message: "The Cart is not defined",
         });
       } else {
         resolve(await Promise.all(cartByUsers));
+        // resolve({
+        //   status: "OK",
+        //   message: "Success",
+        //   data: cartByUsers,
+        // });
       }
     } catch (e) {
       reject(e);
@@ -118,11 +126,12 @@ const getAllByUser = (id) => {
   });
 };
 
-const deleteCart = (id) => {
+const deleteCart = (id, iduser) => {
   return new Promise(async (resolve, reject) => {
     try {
       const checkCart = await Cart.findOne({
-        _id: id,
+        idItem: id,
+        idUser: iduser,
       });
       if (checkCart === null) {
         resolve({
@@ -131,7 +140,7 @@ const deleteCart = (id) => {
         });
       }
 
-      await Cart.findByIdAndDelete(id);
+      await Cart.findByIdAndDelete(checkCart._id);
       resolve({
         status: "OK",
         message: "Delete Cart success",
