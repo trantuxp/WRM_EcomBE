@@ -47,6 +47,7 @@ const createOrder = (newOrder) => {
           };
         }
       });
+
       const results = await Promise.all(promises);
       const newData = results && results.filter((item) => item.id);
       if (newData.length > 0) {
@@ -134,7 +135,7 @@ const getAllOrderDetails = (id) => {
 const getOrderDetails = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const order = await Order.findById({
+      const order = await Order.findOne({
         _id: id,
       });
       if (order === null) {

@@ -15,21 +15,21 @@ const createUser = (newUser) => {
           status: "ERR",
           message: "The email is already",
         });
-        return;
-      }
-      const hash = bcrypt.hashSync(`${password}`, 10);
-      const createdUser = await User.create({
-        name,
-        email,
-        password: hash,
-        phone,
-      });
-      if (createdUser) {
-        resolve({
-          status: "OK",
-          message: "SUCCESS",
-          data: createdUser,
+      } else {
+        const hash = bcrypt.hashSync(`${password}`, 10);
+        const createdUser = await User.create({
+          name,
+          email,
+          password: hash,
+          phone,
         });
+        if (createdUser) {
+          resolve({
+            status: "OK",
+            message: "SUCCESS",
+            data: createdUser,
+          });
+        }
       }
     } catch (e) {
       reject(e);
@@ -152,7 +152,11 @@ const deleteManyUser = (ids) => {
 const getAllUser = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const allUser = await User.find().sort({ createdAt: -1, updatedAt: -1 });
+      // const allUser = await User.find({}, { _id: 1, email: 1 }).sort({
+      const allUser = await User.find().sort({
+        createdAt: -1,
+        updatedAt: -1,
+      });
       resolve({
         status: "OK",
         message: "Success",

@@ -44,7 +44,6 @@ const updateCart = (id, newAmount, iduser) => {
         idItem: id,
         idUser: iduser,
       });
-      console.log("amount, cartid", newAmount, id, iduser);
 
       if (checkCart === null) {
         resolve({
