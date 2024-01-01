@@ -1,4 +1,5 @@
 const ReplyEvaluate = require("../models/ReplyEvaluateModel");
+const User = require("../models/UserModel");
 
 const createReplyEvaluate = (newReplyEvaluate) => {
   return new Promise(async (resolve, reject) => {
@@ -32,7 +33,7 @@ const createReplyEvaluate = (newReplyEvaluate) => {
     }
   });
 };
-const updateReplyEvaluate = (id, data) => {
+const updateReplyEvaluate = (id, content) => {
   return new Promise(async (resolve, reject) => {
     try {
       const checkReplyEvaluate = await ReplyEvaluate.findOne({
@@ -47,7 +48,7 @@ const updateReplyEvaluate = (id, data) => {
 
       const updatedReplyEvaluate = await ReplyEvaluate.findByIdAndUpdate(
         id,
-        data,
+        content,
         {
           new: true,
         }
@@ -66,14 +67,32 @@ const updateReplyEvaluate = (id, data) => {
 const getByEvaluate = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const allReplyEvaluate = await ReplyEvaluate.find({
-        idEvaluate: id,
+      const allReplyEvaluate = await ReplyEvaluate.aggregate([
+        {
+          $lookup: {
+            from: "evaluates",
+            localField: "idEvaluate",
+            foreignField: "_id",
+            as: "evaluate",
+          },
+        },
+      ]);
+      const ReplyEvaluates = allReplyEvaluate.map(async (eva) => {
+        const UserByIdUser = await User.find({ _id: eva.evaluate[0].idUser });
+        if (eva?.idEvaluate.toString() !== id) {
+          console.log("first", id, eva.idEvaluate);
+        } else {
+          return {
+            _id: eva._id,
+            idEvaluate: eva.idEvaluate,
+            idStore: eva.idStore,
+            content: eva.content,
+            evaluate: eva.evaluate,
+            user: UserByIdUser,
+          };
+        }
       });
-      resolve({
-        status: "OK",
-        message: "Success",
-        data: allReplyEvaluate,
-      });
+      resolve(await Promise.all(ReplyEvaluates));
     } catch (e) {
       reject(e);
     }

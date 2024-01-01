@@ -68,6 +68,14 @@ const getAllByStore = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const evaluate = await Evaluate.aggregate([
+        // {
+        //   $lookup: {
+        //     from: "products",
+        //     localField: "idItem",
+        //     foreignField: "_id",
+        //     as: "product",
+        //   },
+        // },
         {
           $lookup: {
             from: "products",
@@ -76,11 +84,24 @@ const getAllByStore = (id) => {
             as: "product",
           },
         },
+        {
+          $unwind: "$product",
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "idUser",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
       ]);
 
-      let EvaluateByStore = evaluate.map(async (eva) => {
-        if (eva.product[0].idStore !== id) {
-          return 0;
+      const EvaluateByStore = evaluate.map(async (eva) => {
+        if (eva.product?.idStore && eva.product?.idStore !== id) {
         } else {
           return {
             _id: eva._id,
@@ -90,12 +111,14 @@ const getAllByStore = (id) => {
             content: eva.content,
             star: eva.star,
             product: eva.product,
+            productName: eva.product.name,
+            user: eva.user,
+            userName: eva.user.name,
             createdAt: eva.createdAt,
             updatedAt: eva.updatedAt,
           };
         }
       });
-      console.log("id", id);
 
       if (EvaluateByStore === null) {
         resolve({

@@ -68,7 +68,7 @@ const getDetailsStoreSv = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       const store = await Store.findOne({
-        _id: id,
+        idUser: id,
       });
       console.log("store", store);
 

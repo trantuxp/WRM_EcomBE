@@ -21,17 +21,17 @@ const createReplyEvaluate = async (req, res) => {
 const updateReplyEvaluate = async (req, res) => {
   try {
     const ReplyEvaluateId = req.params.id;
-    const data = req.body;
+    const content = req.body;
     if (!ReplyEvaluateId) {
       return res.status(200).json({
         status: "ERR",
         message: "The ReplyEvaluateId is required",
       });
     }
-    console.log("ReplyEvaluateId, amount", ReplyEvaluateId, data);
+    console.log("ReplyEvaluateId, amount", ReplyEvaluateId, content);
     const response = await ReplyEvaluateService.updateReplyEvaluate(
       ReplyEvaluateId,
-      data
+      content
     );
     return res.status(200).json(response);
   } catch (e) {
