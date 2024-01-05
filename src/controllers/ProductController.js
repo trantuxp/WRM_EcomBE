@@ -155,6 +155,27 @@ const getAllType = async (req, res) => {
     });
   }
 };
+const getRecommend = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const response = await ProductService.getRecommend(id);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+const getRecommendNoId = async (req, res) => {
+  try {
+    const response = await ProductService.getRecommendNoId();
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 
 module.exports = {
   createProduct,
@@ -164,4 +185,6 @@ module.exports = {
   getAllProduct,
   deleteMany,
   getAllType,
+  getRecommend,
+  getRecommendNoId,
 };
