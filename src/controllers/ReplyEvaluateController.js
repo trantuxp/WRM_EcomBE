@@ -3,6 +3,7 @@ const ReplyEvaluateService = require("../services/ReplyEvaluateService");
 const createReplyEvaluate = async (req, res) => {
   try {
     const { idEvaluate, idStore, content } = req.body;
+    console.log(idEvaluate, idStore, content);
     if (!idEvaluate || !idStore || !content) {
       return res.status(200).json({
         status: "ERR",
@@ -44,13 +45,19 @@ const updateReplyEvaluate = async (req, res) => {
 const getByEvaluate = async (req, res) => {
   try {
     const evaluateId = req.params.id;
+    const { idUser } = req.query;
+    console.log("idUser", idUser);
+
     if (!evaluateId) {
       return res.status(200).json({
         status: "ERR",
         message: "The productId is required",
       });
     }
-    const response = await ReplyEvaluateService.getByEvaluate(evaluateId);
+    const response = await ReplyEvaluateService.getByEvaluate(
+      evaluateId,
+      idUser
+    );
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({

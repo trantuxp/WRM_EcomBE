@@ -263,21 +263,15 @@ const getAllType = () => {
   });
 };
 
-function removeDuplicateObjects(arrayOfObjects, key) {
-  const seen = new Map();
-  const data = [];
-  return arrayOfObjects.map((obj) => {
-    const keyValue = obj[key];
-    if (!seen.has(keyValue)) {
-      seen.set(keyValue, true);
-      console.log("obj", obj._id);
-      data.push(obj);
-      return data;
-    }
-    return false;
-  });
-}
-
+const removeDuplicateObjects = (arrayOfObjects) => {
+  const uniqueData = Object.values(
+    arrayOfObjects.reduce((acc, obj) => {
+      acc[obj._id] = acc[obj._id] || obj;
+      return acc;
+    }, {})
+  );
+  return uniqueData;
+};
 const getRecommend = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -311,7 +305,7 @@ const getRecommend = (id) => {
         tfidf.addDocument(value);
       });
       var s = JSON.stringify(tfidf);
-      console.log(inputTitles[0].split(" "), s);
+      // console.log(inputTitles[0].split(" "), s);
 
       fs.writeFileSync("model.json", s);
 
@@ -345,20 +339,21 @@ const getRecommend = (id) => {
         });
       });
 
-      const productByRecommend = trainData.map(async (pro) => {
-        const productByRecommend = await Product.find({ _id: pro._id });
+      const productByRecommend = await Promise.all(
+        trainData.map(async (pro) => {
+          const productByRecommend = await Product.find({ _id: pro._id });
 
-        return {
-          _id: pro._id,
-          name: pro.name,
-          products: productByRecommend,
-        };
-      });
-      // const productByRecommend8NotDuplicate = removeDuplicateObjects(
-      //   productByRecommend,
-      //   "_id"
-      // );
-      const productByRecommend8 = productByRecommend.slice(0, 8);
+          return {
+            _id: pro._id,
+            name: pro.name,
+            products: productByRecommend,
+          };
+        })
+      );
+
+      const productByRecommend8NotDuplicate =
+        removeDuplicateObjects(productByRecommend);
+      const productByRecommend8 = productByRecommend8NotDuplicate.slice(0, 8);
 
       if (productByRecommend8 === null) {
         resolve({
@@ -367,13 +362,12 @@ const getRecommend = (id) => {
         });
       } else {
         resolve(await Promise.all(productByRecommend8));
+        // resolve({
+        //   status: "OK",
+        //   message: "Success",
+        //   data: uniqueData,
+        // });
       }
-      // resolve({
-      //   status: "OK",
-      //   message: "Success",
-      //   viewed_data: viewed_data,
-      //   data: trainData,
-      // });
     } catch (e) {
       reject(e);
     }
@@ -453,16 +447,20 @@ const getRecommendNoId = () => {
         });
       });
 
-      const productByRecommend = trainData.map(async (pro) => {
-        const productByRecommend = await Product.find({ _id: pro._id });
+      const productByRecommend = await Promise.all(
+        trainData.map(async (pro) => {
+          const productByRecommend = await Product.find({ _id: pro._id });
 
-        return {
-          _id: pro._id,
-          name: pro.name,
-          products: productByRecommend,
-        };
-      });
-      const productByRecommend8 = productByRecommend.slice(0, 8);
+          return {
+            _id: pro._id,
+            name: pro.name,
+            products: productByRecommend,
+          };
+        })
+      );
+      const productByRecommend8NotDuplicate =
+        removeDuplicateObjects(productByRecommend);
+      const productByRecommend8 = productByRecommend8NotDuplicate.slice(0, 8);
 
       if (productByRecommend8 === null) {
         resolve({

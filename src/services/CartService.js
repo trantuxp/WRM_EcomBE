@@ -149,9 +149,35 @@ const deleteCart = (id, iduser) => {
     }
   });
 };
+const deleteManyCart = (ids, idUser) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("ids", ids, idUser);
+      const arrayId = ids.split(",");
+      console.log(typeof arrayId, arrayId);
+
+      arrayId.map((id) => {
+        console.log("id", id);
+        deleteCart(id, idUser);
+      });
+      // resolve(await Promise.all(cartById));
+
+      // const deleteMany = await Cart.deleteMany(filter);
+      // console.log("findMany", cartById);
+      // resolve({
+      //   status: "OK",
+      //   message: "Delete product success",
+      //   data: cartById,
+      // });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 module.exports = {
   createCart,
   updateCart,
   getAllByUser,
   deleteCart,
+  deleteManyCart,
 };

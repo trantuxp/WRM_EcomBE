@@ -1,3 +1,4 @@
+const Evaluate = require("../models/EvaluateModel");
 const Order = require("../models/OrderProduct");
 const Product = require("../models/ProductModel");
 // const EmailService = require("../services/EmailService");
@@ -51,7 +52,7 @@ const createOrder = (newOrder) => {
       const results = await Promise.all(promises);
       const newData = results && results.filter((item) => item.id);
       if (newData.length > 0) {
-        console.log("dang  tạo ne", newData);
+        // console.log("dang  tạo ne", newData);
 
         const arrId = [];
         newData.forEach((item) => {
@@ -144,7 +145,31 @@ const getOrderDetails = (id) => {
           message: "The order is not defined",
         });
       }
-
+      // const evaluateByUsers = (
+      //   order.map(async (ord) => {
+      //     ord.orderItems.map(async (orderI) => {
+      //       // const evaluateByUsers = await Evaluate.find({
+      //       //   idItem: orderI.product,
+      //       // });
+      //       return {
+      //         shippingAddress: ord.shippingAddress,
+      //         _id: ord._id,
+      //         orderItems: ord.ordItems,
+      //         paymentMethod: ord.paymentMethod,
+      //         itemsPrice: ord.itemsPrice,
+      //         shippingPrice: ord.shippingPrice,
+      //         totalPrice: ord.totalPrice,
+      //         user: ord.user,
+      //         isPaid: ord.isPaid,
+      //         isDelivered: ord.isDelivered,
+      //         // evaluateByUsers: evaluateByUsers,
+      //         createdAt: ord.createdAt,
+      //         updatedAt: ord.updatedAt,
+      //       };
+      //     });
+      //   })
+      // );
+      // resolve(await Promise.all(evaluateByUsers));
       resolve({
         status: "OK",
         message: "SUCESSS",
@@ -179,8 +204,8 @@ const cancelOrderDetails = (id, data) => {
           order = await Order.findByIdAndDelete(id);
           if (order === null) {
             resolve({
-              status: "ERR",
-              message: "The order is not defined",
+              status: "OK",
+              message: "The order is deleted",
             });
           }
         } else {

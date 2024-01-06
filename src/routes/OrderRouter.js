@@ -4,17 +4,9 @@ const OrderController = require("../controllers/OrderController");
 const { authMiddleWare } = require("../middleware/authMiddleware");
 
 router.post("/create/:id", OrderController.createOrder);
-router.get(
-  "/get-order-by-user/:id",
-
-  OrderController.getAllOrderDetails
-);
+router.get("/get-order-by-user/:id", OrderController.getAllOrderDetails);
 router.get("/get-details-order/:id", OrderController.getDetailsOrder);
-router.delete(
-  "/cancel-order/:id",
-
-  OrderController.cancelOrderDetails
-);
+router.delete("/cancel-order/:id", OrderController.cancelOrderDetails);
 router.get("/get-all-order", OrderController.getAllOrder);
 
 module.exports = router;

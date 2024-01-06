@@ -103,20 +103,21 @@ const getAllByStore = (id) => {
       const EvaluateByStore = evaluate.map(async (eva) => {
         if (eva.product?.idStore && eva.product?.idStore !== id) {
         } else {
-          return {
-            _id: eva._id,
-            idItem: eva.idItem,
-            idUser: eva.idUser,
-            idOrder: eva.idOrder,
-            content: eva.content,
-            star: eva.star,
-            product: eva.product,
-            productName: eva.product.name,
-            user: eva.user,
-            userName: eva.user.name,
-            createdAt: eva.createdAt,
-            updatedAt: eva.updatedAt,
-          };
+          if (eva.star > 0)
+            return {
+              _id: eva._id,
+              idItem: eva.idItem,
+              idUser: eva.idUser,
+              idOrder: eva.idOrder,
+              content: eva.content,
+              star: eva.star,
+              product: eva.product,
+              productName: eva.product.name,
+              user: eva.user,
+              userName: eva.user.name,
+              createdAt: eva.createdAt,
+              updatedAt: eva.updatedAt,
+            };
         }
       });
 
@@ -137,6 +138,35 @@ const getAllByStore = (id) => {
       //   message: "Success",
       //   data: evaluate,
       // });
+    } catch (e) {
+      reject("loi");
+    }
+  });
+};
+const getByItemOrder = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { idItem, idUser } = data;
+
+      const evaluate = await Evaluate.find({ idUser: idUser, idItem: idItem });
+
+      if (evaluate === null) {
+        resolve({
+          status: "ERR",
+          message: "The Cart is not defined",
+        });
+      } else {
+        resolve({
+          status: "OK",
+          message: "Success",
+          data: evaluate,
+        });
+      }
+      // const allEvaluate = await Evaluate.find().sort({
+      //   createdAt: -1,
+      //   updatedAt: -1,
+      // });
+      //
     } catch (e) {
       reject("loi");
     }
@@ -171,4 +201,5 @@ module.exports = {
   updateEvaluate,
   getAllByStore,
   deleteEvaluate,
+  getByItemOrder,
 };

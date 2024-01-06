@@ -74,10 +74,28 @@ const deleteCart = async (req, res) => {
     });
   }
 };
+const deleteManyCart = async (req, res) => {
+  try {
+    const { ids, idUser } = req.query;
+    if (!ids && !idUser) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The ids is required",
+      });
+    }
+    const response = await CartService.deleteManyCart(ids, idUser);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 
 module.exports = {
   createCart,
   updateCart,
   getAllByUser,
   deleteCart,
+  deleteManyCart,
 };

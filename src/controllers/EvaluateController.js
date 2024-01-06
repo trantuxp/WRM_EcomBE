@@ -55,6 +55,24 @@ const getAllByStore = async (req, res) => {
     });
   }
 };
+const getByItemOrder = async (req, res) => {
+  try {
+    const { idItem, idUser } = req.body;
+
+    if (!idItem || !idUser) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The productId is required",
+      });
+    }
+    const response = await EvaluateService.getByItemOrder(req.body);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 const deleteEvaluate = async (req, res) => {
   try {
     const EvaluateId = req.params.id;
@@ -78,4 +96,5 @@ module.exports = {
   updateEvaluate,
   getAllByStore,
   deleteEvaluate,
+  getByItemOrder,
 };

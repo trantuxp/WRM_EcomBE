@@ -1,3 +1,4 @@
+const Evaluate = require("../models/EvaluateModel");
 const ReplyEvaluate = require("../models/ReplyEvaluateModel");
 const User = require("../models/UserModel");
 
@@ -64,34 +65,42 @@ const updateReplyEvaluate = (id, content) => {
   });
 };
 
-const getByEvaluate = (id) => {
+const getByEvaluate = (id, idUser) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const allReplyEvaluate = await ReplyEvaluate.aggregate([
-        {
-          $lookup: {
-            from: "evaluates",
-            localField: "idEvaluate",
-            foreignField: "_id",
-            as: "evaluate",
-          },
-        },
-      ]);
-      const ReplyEvaluates = allReplyEvaluate.map(async (eva) => {
-        const UserByIdUser = await User.find({ _id: eva.evaluate[0].idUser });
-        if (eva?.idEvaluate.toString() !== id) {
-          console.log("first", id, eva.idEvaluate);
-        } else {
-          return {
-            _id: eva._id,
-            idEvaluate: eva.idEvaluate,
-            idStore: eva.idStore,
-            content: eva.content,
-            evaluate: eva.evaluate,
-            user: UserByIdUser,
-          };
-        }
+      const allReplyEvaluate = await ReplyEvaluate.find({
+        idEvaluate: id,
       });
+      // const allReplyEvaluateById = await Promise.all(
+      //   allReplyEvaluate.find({
+      //     idEvaluate: id,
+      //   })
+      // );
+
+      const ReplyEvaluates = allReplyEvaluate.map(async (eva) => {
+        const UserByIdUser = await User.find(
+          {
+            _id: idUser,
+          },
+          "_id name"
+        );
+        const evaluateById = await Evaluate.find({ _id: id });
+
+        return {
+          _id: eva._id,
+          idEvaluate: eva.idEvaluate,
+          idStore: eva.idStore,
+          content: eva.content,
+          evaluate: eva.evaluate,
+          user: UserByIdUser,
+          evaluate: evaluateById,
+        };
+      });
+      // resolve({
+      //   status: "OK",
+      //   message: "Delete ReplyEvaluate success",
+      //   data: allReplyEvaluateById,
+      // });
       resolve(await Promise.all(ReplyEvaluates));
     } catch (e) {
       reject(e);
