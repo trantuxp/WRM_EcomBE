@@ -177,6 +177,20 @@ const getRecommendNoId = async (req, res) => {
   }
 };
 
+const getByStore = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const response1 = await ProductService.getByStore(id);
+    // console.log("ádasd", req.query, Number(limit));
+
+    return res.status(200).json(response1);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 module.exports = {
   createProduct,
   updateProduct,
@@ -187,4 +201,5 @@ module.exports = {
   getAllType,
   getRecommend,
   getRecommendNoId,
+  getByStore,
 };

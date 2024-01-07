@@ -1,5 +1,6 @@
 const Product = require("../models/ProductModel");
 const Search = require("../models/SearchModel");
+const Order = require("../models/OrderProduct");
 const fs = require("fs");
 const TfIdf = require("node-tfidf");
 
@@ -376,106 +377,145 @@ const getRecommend = (id) => {
 const getRecommendNoId = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      const products = await Product.find({}, "_id name");
-      const hotSearch = await Search.aggregate([
+      const products = await Order.aggregate([
         {
-          $group: {
-            _id: "$content",
-            count: { $sum: 1 },
-            id: { $first: "$_id" },
-            content: { $first: "$content" },
+          $unwind: "$orderItems", // Deconstruct the orderItems array
+        },
+        {
+          $match: {
+            // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
+            "orderItems.name": "banhmi", // Filter only 'banhmi' items
           },
         },
-        { $match: { count: { $gt: 1 } } },
-        { $sort: { count: -1 } },
+        {
+          $group: {
+            _id: "$orderItems._id",
+            totalPrice: {
+              $sum: { $multiply: ["$orderItems.price", "$orderItems.amount"] },
+            },
+            user: { $first: "$user" }, // Include the user field
+            shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
+            paymentMethod: { $first: "$paymentMethod" },
+            orderItems: { $first: "$orderItems" },
+          },
+        },
       ]);
-      var dataSearch = JSON.stringify(products);
+      // const products = await Product.find({}, "_id name");
+      // const hotSearch = await Search.aggregate([
+      //   {
+      //     $group: {
+      //       _id: "$content",
+      //       count: { $sum: 1 },
+      //       id: { $first: "$_id" },
+      //       content: { $first: "$content" },
+      //     },
+      //   },
+      //   { $match: { count: { $gt: 1 } } },
+      //   { $sort: { count: -1 } },
+      // ]);
+      // var dataSearch = JSON.stringify(products);
 
-      fs.writeFileSync("dataNoid.json", dataSearch);
+      // fs.writeFileSync("dataNoid.json", dataSearch);
 
-      const dataset = JSON.parse(fs.readFileSync("dataNoid.json", "utf-8"));
+      // const dataset = JSON.parse(fs.readFileSync("dataNoid.json", "utf-8"));
 
-      // // Chuẩn bị dữ liệu đầu vào và đầu ra
-      const idPost = []; // Tiêu đề bài viết dự đoán
-      const inputTitles = []; // Tiêu đề bài viết
-      dataset.forEach((value) => {
-        idPost.push(value._id);
-        const nameNomaly = value.name
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
+      // // // Chuẩn bị dữ liệu đầu vào và đầu ra
+      // const idPost = []; // Tiêu đề bài viết dự đoán
+      // const inputTitles = []; // Tiêu đề bài viết
+      // dataset.forEach((value) => {
+      //   idPost.push(value._id);
+      //   const nameNomaly = value.name
+      //     .normalize("NFD")
+      //     .replace(/[\u0300-\u036f]/g, "");
 
-        inputTitles.push(nameNomaly.toLowerCase());
-      });
-
-      const tfidf = new TfIdf();
-
-      inputTitles.forEach((value) => {
-        tfidf.addDocument(value);
-      });
-      var s = JSON.stringify(tfidf);
-      console.log(inputTitles[0].split(" "), s);
-
-      fs.writeFileSync("modelNoId.json", s);
-
-      const model = fs.readFileSync("modelNoId.json", "utf-8");
-      var tfidfmodel = new TfIdf(JSON.parse(model));
-
-      const viewed_data = [];
-      // let viewed_data = [
-      //   ["com"],
-      // ];
-      hotSearch.forEach((value) => {
-        viewed_data.push(value.content);
-      });
-
-      const trainData = [];
-      let data_ = [];
-      viewed_data.forEach((value) => {
-        tfidfmodel.tfidfs(value, function (i, measure) {
-          if (measure > 0) {
-            console.log(dataset[i].name);
-            console.log(data_.indexOf(dataset[i].name));
-            if (data_.indexOf(dataset[i].name) < 0) {
-              let dataa = {
-                ...dataset[i],
-                similarities: measure,
-              };
-
-              trainData.push(dataa);
-            }
-          }
-        });
-      });
-
-      const productByRecommend = await Promise.all(
-        trainData.map(async (pro) => {
-          const productByRecommend = await Product.find({ _id: pro._id });
-
-          return {
-            _id: pro._id,
-            name: pro.name,
-            products: productByRecommend,
-          };
-        })
-      );
-      const productByRecommend8NotDuplicate =
-        removeDuplicateObjects(productByRecommend);
-      const productByRecommend8 = productByRecommend8NotDuplicate.slice(0, 8);
-
-      if (productByRecommend8 === null) {
-        resolve({
-          status: "ERR",
-          message: "The Cart is not defined",
-        });
-      } else {
-        resolve(await Promise.all(productByRecommend8));
-      }
-      // resolve({
-      //   status: "OK",
-      //   message: "Success",
-      //   viewed_data: viewed_data,
-      //   data: trainData,
+      //   inputTitles.push(nameNomaly.toLowerCase());
       // });
+
+      // const tfidf = new TfIdf();
+
+      // inputTitles.forEach((value) => {
+      //   tfidf.addDocument(value);
+      // });
+      // var s = JSON.stringify(tfidf);
+      // console.log(inputTitles[0].split(" "), s);
+
+      // fs.writeFileSync("modelNoId.json", s);
+
+      // const model = fs.readFileSync("modelNoId.json", "utf-8");
+      // var tfidfmodel = new TfIdf(JSON.parse(model));
+
+      // const viewed_data = [];
+      // // let viewed_data = [
+      // //   ["com"],
+      // // ];
+      // hotSearch.forEach((value) => {
+      //   viewed_data.push(value.content);
+      // });
+
+      // const trainData = [];
+      // let data_ = [];
+      // viewed_data.forEach((value) => {
+      //   tfidfmodel.tfidfs(value, function (i, measure) {
+      //     if (measure > 0) {
+      //       console.log(dataset[i].name);
+      //       console.log(data_.indexOf(dataset[i].name));
+      //       if (data_.indexOf(dataset[i].name) < 0) {
+      //         let dataa = {
+      //           ...dataset[i],
+      //           similarities: measure,
+      //         };
+
+      //         trainData.push(dataa);
+      //       }
+      //     }
+      //   });
+      // });
+
+      // const productByRecommend = await Promise.all(
+      //   trainData.map(async (pro) => {
+      //     const productByRecommend = await Product.find({ _id: pro._id });
+
+      //     return {
+      //       _id: pro._id,
+      //       name: pro.name,
+      //       products: productByRecommend,
+      //     };
+      //   })
+      // );
+      // const productByRecommend8NotDuplicate =
+      //   removeDuplicateObjects(productByRecommend);
+      // const productByRecommend8 = productByRecommend8NotDuplicate.slice(0, 8);
+
+      // if (productByRecommend8 === null) {
+      //   resolve({
+      //     status: "ERR",
+      //     message: "The Cart is not defined",
+      //   });
+      // } else {
+      //   resolve(await Promise.all(productByRecommend8));
+      // }
+
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: products,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+const getByStore = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const TotalallObject = await Product.find({ idStore: id });
+
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: TotalallObject,
+      });
     } catch (e) {
       reject(e);
     }
@@ -492,4 +532,5 @@ module.exports = {
   getAllType,
   getRecommend,
   getRecommendNoId,
+  getByStore,
 };

@@ -26,67 +26,67 @@ app.get("/", (req, res) => {
   res.send("Hello world everyone");
 });
 
-app.get("/train-model", (req, res) => {
-  const dataset = JSON.parse(fs.readFileSync("src/data.json", "utf-8"));
-  // console.log(dataset) ;
-  // // Chuẩn bị dữ liệu đầu vào và đầu ra
-  const idPost = []; // Tiêu đề bài viết dự đoán
-  const inputTitles = []; // Tiêu đề bài viết
-  dataset.forEach((value) => {
-    idPost.push(value._id);
-    inputTitles.push(value.title.toLowerCase());
-  });
-  console.log(inputTitles[0].split(" "));
+// app.get("/train-model", (req, res) => {
+//   const dataset = JSON.parse(fs.readFileSync("src/data.json", "utf-8"));
+//   // console.log(dataset) ;
+//   // // Chuẩn bị dữ liệu đầu vào và đầu ra
+//   const idPost = []; // Tiêu đề bài viết dự đoán
+//   const inputTitles = []; // Tiêu đề bài viết
+//   dataset.forEach((value) => {
+//     idPost.push(value._id);
+//     inputTitles.push(value.title.toLowerCase());
+//   });
+//   console.log(inputTitles[0].split(" "));
 
-  const tfidf = new TfIdf();
+//   const tfidf = new TfIdf();
 
-  inputTitles.forEach((value) => {
-    tfidf.addDocument(value);
-  });
-  var s = JSON.stringify(tfidf);
-  console.log("tfidf", tfidf);
-  fs.writeFileSync("model.json", s);
+//   inputTitles.forEach((value) => {
+//     tfidf.addDocument(value);
+//   });
+//   var s = JSON.stringify(tfidf);
+//   console.log("tfidf", tfidf);
+//   fs.writeFileSync("model.json", s);
 
-  res.send("train model");
-});
+//   res.send("train model");
+// });
 
-app.get("/main-train", (req, res) => {
-  const aaa = fs.readFileSync("model.json", "utf-8");
-  var tfidf = new TfIdf(JSON.parse(aaa));
+// app.get("/main-train", (req, res) => {
+//   const aaa = fs.readFileSync("model.json", "utf-8");
+//   var tfidf = new TfIdf(JSON.parse(aaa));
 
-  const dataset = JSON.parse(fs.readFileSync("src/data.json", "utf-8"));
+//   const dataset = JSON.parse(fs.readFileSync("src/data.json", "utf-8"));
 
-  let viewed_data = [
-    ["product"],
+//   let viewed_data = [
+//     ["product"],
 
-    // ["product", "metrics", "Orchestrator"]
-  ];
+//     // ["product", "metrics", "Orchestrator"]
+//   ];
 
-  let trainData1 = [];
-  let data_ = [];
-  viewed_data.forEach((value) => {
-    tfidf.tfidfs(value, function (i, measure) {
-      // console.log('document #' + idPost[i] + ' is ' + measure);
-      if (measure > 0) {
-        console.log(dataset[i].title);
-        console.log(data_.indexOf(dataset[i].title));
-        if (data_.indexOf(dataset[i].title) < 0) {
-          let dataa = {
-            ...dataset[i],
-            similarities: measure,
-          };
+//   let trainData1 = [];
+//   let data_ = [];
+//   viewed_data.forEach((value) => {
+//     tfidf.tfidfs(value, function (i, measure) {
+//       // console.log('document #' + idPost[i] + ' is ' + measure);
+//       if (measure > 0) {
+//         console.log(dataset[i].title);
+//         console.log(data_.indexOf(dataset[i].title));
+//         if (data_.indexOf(dataset[i].title) < 0) {
+//           let dataa = {
+//             ...dataset[i],
+//             similarities: measure,
+//           };
 
-          trainData1.push(dataa);
-        }
-      }
-    });
-  });
+//           trainData1.push(dataa);
+//         }
+//       }
+//     });
+//   });
 
-  // console.log(trainData1);
-  // console.log("length ----------------");
-  // console.log(trainData1.length);
-  // res.send(trainData1);
-});
+//   // console.log(trainData1);
+//   // console.log("length ----------------");
+//   // console.log(trainData1.length);
+//   // res.send(trainData1);
+// });
 mongoose
   .connect(process.env.MONGO_DB)
   .then(() => {

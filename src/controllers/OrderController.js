@@ -107,6 +107,40 @@ const getAllOrder = async (req, res) => {
     });
   }
 };
+const updateStateOrder = async (req, res) => {
+  try {
+    const idOrder = req.params.id;
+    if (!idOrder) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The PostId is required",
+      });
+    }
+    const response = await OrderService.updateStateOrder(idOrder);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+const updateStateDeliveryOrder = async (req, res) => {
+  try {
+    const idOrder = req.params.id;
+    if (!idOrder) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The PostId is required",
+      });
+    }
+    const response = await OrderService.updateStateDeliveryOrder(idOrder);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 
 module.exports = {
   createOrder,
@@ -114,4 +148,6 @@ module.exports = {
   getDetailsOrder,
   cancelOrderDetails,
   getAllOrder,
+  updateStateOrder,
+  updateStateDeliveryOrder,
 };

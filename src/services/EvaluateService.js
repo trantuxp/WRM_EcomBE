@@ -143,12 +143,13 @@ const getAllByStore = (id) => {
     }
   });
 };
-const getByItemOrder = (data) => {
+const getByItemOrder = (idItem, idOrder) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { idItem, idUser } = data;
-
-      const evaluate = await Evaluate.find({ idUser: idUser, idItem: idItem });
+      const evaluate = await Evaluate.find({
+        idOrder: idOrder,
+        idItem: idItem,
+      });
 
       if (evaluate === null) {
         resolve({

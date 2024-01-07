@@ -3,13 +3,13 @@ const EvaluateService = require("../services/EvaluateService");
 const createEvaluate = async (req, res) => {
   try {
     const { idItem, idUser, idOrder, content, star } = req.body;
+
     if (!idItem || !idUser || !idOrder || !content || !star) {
       return res.status(200).json({
         status: "ERR",
         message: "The input is required",
       });
     }
-    console.log("req.body", req.body);
     const response = await EvaluateService.createEvaluate(req.body);
     return res.status(200).json(response);
   } catch (e) {
@@ -57,15 +57,14 @@ const getAllByStore = async (req, res) => {
 };
 const getByItemOrder = async (req, res) => {
   try {
-    const { idItem, idUser } = req.body;
-
-    if (!idItem || !idUser) {
+    const { idItem, idOrder } = req.query;
+    if (!idItem || !idOrder) {
       return res.status(200).json({
         status: "ERR",
         message: "The productId is required",
       });
     }
-    const response = await EvaluateService.getByItemOrder(req.body);
+    const response = await EvaluateService.getByItemOrder(idItem, idOrder);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({

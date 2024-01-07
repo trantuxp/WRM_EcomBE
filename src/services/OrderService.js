@@ -253,6 +253,88 @@ const getAllOrder = () => {
     }
   });
 };
+const getOrderByStore = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const orders = await Order.aggregate([
+        {
+          $unwind: "$orderItems", // Deconstruct the orderItems array
+        },
+        {
+          $match: {
+            // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
+            "orderItems.name": "banhmi", // Filter only 'banhmi' items
+          },
+        },
+        {
+          $group: {
+            _id: "$orderItems._id",
+            totalPrice: {
+              $sum: {
+                $multiply: ["$orderItems.price", "$orderItems.amount"],
+              },
+            },
+            user: { $first: "$user" }, // Include the user field
+            shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
+            paymentMethod: { $first: "$paymentMethod" },
+            orderItems: { $first: "$orderItems" },
+          },
+        },
+      ]);
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: orders,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+const updateStateOrder = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("id", id);
+
+      const updatedOrder = await Order.findByIdAndUpdate(
+        id,
+        { isPaid: "true" },
+        {
+          new: true,
+        }
+      );
+      resolve({
+        status: "OK",
+        message: "SUCCESS",
+        data: updatedOrder,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+const updateStateDeliveryOrder = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("id", id);
+
+      const updatedOrder = await Order.findByIdAndUpdate(
+        id,
+        { isDelivered: "true" },
+        {
+          new: true,
+        }
+      );
+      resolve({
+        status: "OK",
+        message: "SUCCESS",
+        data: updatedOrder,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 module.exports = {
   createOrder,
@@ -260,4 +342,7 @@ module.exports = {
   getOrderDetails,
   cancelOrderDetails,
   getAllOrder,
+  updateStateOrder,
+  updateStateDeliveryOrder,
+  getOrderByStore,
 };
