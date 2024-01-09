@@ -141,7 +141,24 @@ const updateStateDeliveryOrder = async (req, res) => {
     });
   }
 };
-
+const getOrderByStore = async (req, res) => {
+  try {
+    const StoreId = req.params.id;
+    if (!StoreId) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The userId is required",
+      });
+    }
+    const response = await OrderService.getOrderByStore(StoreId);
+    return res.status(200).json(response);
+  } catch (e) {
+    // console.log(e)
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 module.exports = {
   createOrder,
   getAllOrderDetails,
@@ -150,4 +167,5 @@ module.exports = {
   getAllOrder,
   updateStateOrder,
   updateStateDeliveryOrder,
+  getOrderByStore,
 };

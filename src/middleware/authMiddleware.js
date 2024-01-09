@@ -21,6 +21,25 @@ const authMiddleWare = (req, res, next) => {
     }
   });
 };
+const authMiddleWareStore = (req, res, next) => {
+  // const token = req.headers.token.split(" ")[1];
+  jwt.verify(req.query.token, process.env.ACCESS_TOKEN, function (err, user) {
+    if (err) {
+      return res.status(404).json({
+        message: "The authemtication",
+        status: "ERROR",
+      });
+    }
+    if (user?.isStore) {
+      next();
+    } else {
+      return res.status(404).json({
+        message: "The authemtication",
+        status: "ERROR",
+      });
+    }
+  });
+};
 
 const authUserMiddleWare = (req, res, next) => {
   // const token = req.headers.token.split(" ")[1];
@@ -46,4 +65,5 @@ const authUserMiddleWare = (req, res, next) => {
 module.exports = {
   authMiddleWare,
   authUserMiddleWare,
+  authMiddleWareStore,
 };

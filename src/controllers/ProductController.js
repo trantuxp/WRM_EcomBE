@@ -168,6 +168,8 @@ const getRecommend = async (req, res) => {
 };
 const getRecommendNoId = async (req, res) => {
   try {
+    // const { name } = req.query;
+
     const response = await ProductService.getRecommendNoId();
     return res.status(200).json(response);
   } catch (e) {

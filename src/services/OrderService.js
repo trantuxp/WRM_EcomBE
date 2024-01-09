@@ -1,3 +1,4 @@
+const { identity } = require("lodash");
 const Evaluate = require("../models/EvaluateModel");
 const Order = require("../models/OrderProduct");
 const Product = require("../models/ProductModel");
@@ -253,9 +254,11 @@ const getAllOrder = () => {
     }
   });
 };
-const getOrderByStore = () => {
+const getOrderByStore = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log("id", typeof id);
+
       const orders = await Order.aggregate([
         {
           $unwind: "$orderItems", // Deconstruct the orderItems array
@@ -263,7 +266,7 @@ const getOrderByStore = () => {
         {
           $match: {
             // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
-            "orderItems.name": "banhmi", // Filter only 'banhmi' items
+            "orderItems.idStore": id, // Filter only 'banhmi' items
           },
         },
         {
@@ -278,6 +281,12 @@ const getOrderByStore = () => {
             shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
             paymentMethod: { $first: "$paymentMethod" },
             orderItems: { $first: "$orderItems" },
+            itemsPrice: { $first: "$itemsPrice" },
+            shippingPrice: { $first: "$shippingPrice" },
+            isPaid: { $first: "$isPaid" },
+            isDelivered: { $first: "$isDelivered" },
+            createdAt: { $first: "$createdAt" },
+            updatedAt: { $first: "$updatedAt" },
           },
         },
       ]);

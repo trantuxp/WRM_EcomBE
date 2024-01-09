@@ -70,7 +70,7 @@ const getDetailsStoreSv = (id) => {
       const store = await Store.findOne({
         idUser: id,
       });
-      console.log("store", store);
+      // console.log("store", store);
 
       if (store === null) {
         resolve({

@@ -66,11 +66,13 @@ const loginUser = (userLogin) => {
       const access_token = await genneralAccessToken({
         id: checkUser.id,
         isAdmin: checkUser.isAdmin,
+        isStore: checkUser.isStore,
       });
 
       const refresh_token = await genneralRefreshToken({
         id: checkUser.id,
         isAdmin: checkUser.isAdmin,
+        isStore: checkUser.isStore,
       });
 
       resolve({

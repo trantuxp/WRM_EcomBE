@@ -203,7 +203,6 @@ const getAllPostByStoreSv = (StoreId) => {
       const AllPostByStoreSv = await Post.find({
         idStore: StoreId,
       });
-      console.log(" looi");
 
       resolve({
         status: "OK",

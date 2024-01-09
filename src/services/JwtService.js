@@ -39,6 +39,7 @@ const refreshTokenJwtService = (token) => {
         const access_token = await genneralAccessToken({
           id: user?.id,
           isAdmin: user?.isAdmin,
+          isStore: user?.isStore,
         });
         resolve({
           status: "OK",
