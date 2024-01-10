@@ -12,6 +12,8 @@ router.delete(
   ProductController.deleteProduct
 );
 router.get("/get-all", ProductController.getAllProduct);
+router.get("/get-all-v2", ProductController.getAllProductV2);
+
 router.get("/get-by-store/:id", ProductController.getByStore);
 router.post("/delete-many", authMiddleWareStore, ProductController.deleteMany);
 router.get("/get-all-type", ProductController.getAllType);

@@ -15,7 +15,7 @@ const createSearch = (id, content) => {
           message: "The Search name is already",
         });
       } else {
-        console.log("Search", id, content);
+        // console.log("Search", id, content);
 
         const createdSearch = await Search.create({
           content,
@@ -36,7 +36,7 @@ const createSearch = (id, content) => {
 const getSearchByUser = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("Search", id);
+      // console.log("Search", id);
 
       const SearchByUser = await Search.find({ idUser: id })
         .limit(5)

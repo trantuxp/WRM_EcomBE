@@ -3,6 +3,7 @@ const Search = require("../models/SearchModel");
 const Store = require("../models/StoreModel");
 const fs = require("fs");
 const TfIdf = require("node-tfidf");
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 const unorm = require("unorm");
 const Cart = require("../models/CartModel");
@@ -204,50 +205,66 @@ const getAllProductS = (limit, page, sort, filter) => {
       let allProduct = [];
 
       if (filter) {
+        console.log("filter k rong");
         const label = filter[0];
         const regex = new RegExp(filter[1], "i");
-
-        const TotalallObject = await Product.find();
-        const TotalallObjectFilter = searchStartsWith(
-          filter[1],
-          TotalallObject
-        );
-
-        const allObjectFilter = TotalallObjectFilter.slice(
-          (page - 1) * limit,
-          page * limit
-        ) // Limit and skip
-          .sort(
-            (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
-          ); // Sort by createdAt and updatedAt
-        // console.log("allObjectFilter:", allObjectFilter, page, limit);
-
-        const totalProductFilter = TotalallObjectFilter.length;
-        if (page && limit) {
+        if (filter[0] === "type") {
+          const allObjectFilterType = await Product.find({ type: filter[1] })
+            .limit(limit)
+            .skip(page * limit)
+            .sort({ createdAt: -1, updated });
+          const totalProductFilterType = allObjectFilterType.length;
           resolve({
             status: "OK",
             message: "Success",
-            data: allObjectFilter,
-            total: totalProductFilter,
+            data: allObjectFilterType,
+            total: totalProductFilterType,
             pageCurrent: Number(page + 1),
-            totalPage: Math.ceil(totalProductFilter / limit),
+            totalPage: Math.ceil(totalProductFilterType / limit),
+          });
+        } else {
+          const TotalallObject = await Product.find();
+          const TotalallObjectFilter = searchStartsWith(
+            filter[1],
+            TotalallObject
+          );
+
+          const allObjectFilter = TotalallObjectFilter.slice(
+            (page - 1) * limit,
+            page * limit
+          ) // Limit and skip
+            .sort(
+              (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
+            ); // Sort by createdAt and updatedAt
+          // console.log("allObjectFilter:", allObjectFilter, page, limit);
+
+          const totalProductFilter = TotalallObjectFilter.length;
+          if (page && limit) {
+            resolve({
+              status: "OK",
+              message: "Success",
+              data: allObjectFilter,
+              total: totalProductFilter,
+              pageCurrent: Number(page + 1),
+              totalPage: Math.ceil(totalProductFilter / limit),
+            });
+          }
+          resolve({
+            status: "OK",
+            message: "Success",
+            data: TotalallObjectFilter,
+            total: totalProductFilter,
           });
         }
-        resolve({
-          status: "OK",
-          message: "Success",
-          data: TotalallObjectFilter,
-          total: totalProductFilter,
-        });
       }
       if (sort) {
-        const objectSort = {};
-        objectSort[sort[1]] = sort[0];
+        const sortI = Number(sort);
         const allProductSort = await Product.find()
           .limit(limit)
           .skip(page * limit)
-          .sort(objectSort)
-          .sort({ createdAt: -1, updatedAt: -1 });
+          .sort({ price: sortI })
+          .exec();
+
         resolve({
           status: "OK",
           message: "Success",
@@ -281,6 +298,35 @@ const getAllProductS = (limit, page, sort, filter) => {
       reject(e);
     }
   });
+};
+const getAllProductSv2 = async () => {
+  console.log("ab");
+
+  try {
+    const allProduct = await Product.find({}, "_id name type");
+    console.log(allProduct);
+
+    const dataWithPaymentMethod = allProduct.map((item) => {
+      return item;
+    });
+
+    const csvWriter = await createCsvWriter({
+      path: "C:/Users/Tu/Downloads/orders09.csv",
+      header: [
+        { id: "_id", title: "Product_ID" },
+        { id: "name", title: "name" },
+        { id: "type", title: "type" },
+      ],
+    });
+
+    csvWriter
+      .writeRecords(dataWithPaymentMethod)
+      .then(() => console.log("CSV file created successfully."))
+      .catch((error) => console.error(error));
+  } catch (e) {
+    console.log(e);
+    // reject(e);
+  }
 };
 
 const getAllType = () => {
@@ -380,8 +426,8 @@ const getRecommend = (id) => {
       viewed_data.forEach((value) => {
         tfidfmodel.tfidfs(value, function (i, measure) {
           if (measure > 0) {
-            console.log(dataset[i].name);
-            console.log(data_.indexOf(dataset[i].name));
+            // console.log(dataset[i].name);
+            // console.log(data_.indexOf(dataset[i].name));
             if (data_.indexOf(dataset[i].name) < 0) {
               let dataa = {
                 ...dataset[i],
@@ -393,7 +439,7 @@ const getRecommend = (id) => {
           }
         });
       });
-      console.log(trainData);
+      // console.log(trainData);
 
       const productByRecommend = await Promise.all(
         trainData.map(async (pro) => {
@@ -469,7 +515,7 @@ const getRecommendNoId = () => {
         tfidf.addDocument(value.split(" "));
       });
       var s = JSON.stringify(tfidf);
-      console.log(inputTitles[0].split(" "), s);
+      // console.log(inputTitles[0].split(" "), s);
 
       fs.writeFileSync("modelNoId.json", s);
 
@@ -486,8 +532,8 @@ const getRecommendNoId = () => {
       viewed_data.forEach((value) => {
         tfidfmodel.tfidfs(value.split(" "), function (i, measure) {
           if (measure > 0) {
-            console.log(dataset[i].name);
-            console.log(data_.indexOf(dataset[i].name));
+            // console.log(dataset[i].name);
+            // console.log(data_.indexOf(dataset[i].name));
             if (data_.indexOf(dataset[i].name) < 0) {
               let dataa = {
                 ...dataset[i],
@@ -562,4 +608,5 @@ module.exports = {
   getRecommend,
   getRecommendNoId,
   getByStore,
+  getAllProductSv2,
 };

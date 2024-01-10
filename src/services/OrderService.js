@@ -3,7 +3,7 @@ const Evaluate = require("../models/EvaluateModel");
 const Order = require("../models/OrderProduct");
 const Product = require("../models/ProductModel");
 // const EmailService = require("../services/EmailService");
-
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const createOrder = (newOrder) => {
   return new Promise(async (resolve, reject) => {
     const {
@@ -237,27 +237,42 @@ const cancelOrderDetails = (id, data) => {
   });
 };
 
-const getAllOrder = () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const allOrder = await Order.find().sort({
-        createdAt: -1,
-        updatedAt: -1,
-      });
-      resolve({
-        status: "OK",
-        message: "Success",
-        data: allOrder,
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
+const getAllOrder = async () => {
+  try {
+    const orders = await Order.find({}, "orderItems.name user name").lean();
+
+    const orderData = orders.map((order) => ({
+      id: order._id,
+      user: order.user,
+      name: order.orderItems[0].name,
+    }));
+
+    const dataWithPaymentMethod = orderData.map((item) => {
+      return item;
+    });
+
+    const csvWriter = await createCsvWriter({
+      path: "C:/Users/Tu/Downloads/userOrder.csv",
+      header: [
+        { id: "user", title: "ID" },
+        { id: "id", title: "ORDERID" },
+        { id: "name", title: "interest" },
+      ],
+    });
+
+    csvWriter
+      .writeRecords(dataWithPaymentMethod)
+      .then(() => console.log("CSV file created successfully."))
+      .catch((error) => console.error(error));
+  } catch (error) {
+    // Handle error
+    throw new Error("Failed to fetch order data");
+  }
 };
 const getOrderByStore = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("id", typeof id);
+      // console.log("id", typeof id);
 
       const orders = await Order.aggregate([
         {
@@ -303,7 +318,7 @@ const getOrderByStore = (id) => {
 const updateStateOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("id", id);
+      // console.log("id", id);
 
       const updatedOrder = await Order.findByIdAndUpdate(
         id,
@@ -325,7 +340,7 @@ const updateStateOrder = (id) => {
 const updateStateDeliveryOrder = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("id", id);
+      // console.log("id", id);
 
       const updatedOrder = await Order.findByIdAndUpdate(
         id,

@@ -135,6 +135,19 @@ const getAllProduct = async (req, res) => {
       sort || null,
       filter || null
     );
+    console.log("limit, page, sort, filter", limit, page, sort, filter);
+
+    return res.status(200).json(response1);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
+
+const getAllProductV2 = async (req, res) => {
+  try {
+    const response1 = await ProductService.getAllProductSv2();
     // console.log("ádasd", req.query, Number(limit));
 
     return res.status(200).json(response1);
@@ -199,6 +212,7 @@ module.exports = {
   getDetailsProduct,
   deleteProduct,
   getAllProduct,
+  getAllProductV2,
   deleteMany,
   getAllType,
   getRecommend,
