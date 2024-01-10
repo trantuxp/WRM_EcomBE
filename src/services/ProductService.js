@@ -1,10 +1,11 @@
 const Product = require("../models/ProductModel");
 const Search = require("../models/SearchModel");
-const Order = require("../models/OrderProduct");
+const Store = require("../models/StoreModel");
 const fs = require("fs");
 const TfIdf = require("node-tfidf");
 
 const unorm = require("unorm");
+const Cart = require("../models/CartModel");
 const createProduct = (newProduct) => {
   return new Promise(async (resolve, reject) => {
     // //console.log("newProduct", newProduct);
@@ -124,20 +125,53 @@ const deleteManyProduct = (ids) => {
 const getDetailsProduct = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const product = await Product.findOne({
+      const product = await Product.find({
         _id: id,
       });
-      if (product === null) {
-        resolve({
-          status: "ERR",
-          message: "The product is not defined",
-        });
-      }
+      // console.log(product.idStore);
+      const productDetailAndStore = product.map(async (pro) => {
+        const productDetailAndStore = await Store.find(
+          {
+            idUser: pro.idStore,
+          },
+          "nameStore"
+        );
+
+        return {
+          _id: pro._id,
+          name: pro.name,
+          image: pro.image,
+          type: pro.type,
+          price: pro.price,
+          countInStock: pro.countInStock,
+          rating: pro.rating,
+          description: pro.description,
+          discount: pro.discount,
+          selled: pro.selled,
+          idStore: pro.idStore,
+          createdAt: pro.createdAt,
+          updatedAt: pro.updatedAt,
+          store: productDetailAndStore,
+        };
+      });
+      // resolve({
+      //   status: "OK",
+      //   message: "Delete ReplyEvaluate success",
+      //   data: allReplyEvaluateById,
+      // });
+      resolve(await Promise.all(productDetailAndStore));
+
+      // if (product === null) {
+      //   resolve({
+      //     status: "ERR",
+      //     message: "The product is not defined",
+      //   });
+      // }
 
       resolve({
         status: "OK",
         message: "SUCESS",
-        data: product,
+        data: productDetailAndStore,
       });
     } catch (e) {
       reject(e);
@@ -186,7 +220,7 @@ const getAllProductS = (limit, page, sort, filter) => {
           .sort(
             (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
           ); // Sort by createdAt and updatedAt
-        console.log("allObjectFilter:", allObjectFilter, page, limit);
+        // console.log("allObjectFilter:", allObjectFilter, page, limit);
 
         const totalProductFilter = TotalallObjectFilter.length;
         if (page && limit) {
@@ -281,7 +315,7 @@ const getRecommend = (id) => {
       //   .sort({ createdAt: -1, updatedAt: -1 });
 
       const SearchByPro = await Product.find({ _id: id }, "name");
-      console.log(SearchByPro[0].name);
+      // console.log(SearchByPro[0].name);
       const arr = [];
       const name = SearchByPro[0].name
         .normalize("NFD")
@@ -289,7 +323,17 @@ const getRecommend = (id) => {
 
       arr.push(name.toLowerCase());
 
-      const products = await Product.find({}, "_id name");
+      const products = await Product.find(
+        {
+          _id: { $ne: id },
+        },
+        "_id name"
+      );
+
+      // const products = await Product.find(
+      //   { },
+      //   "_id name"
+      // );
 
       var dataSearch = JSON.stringify(products);
 
@@ -329,7 +373,7 @@ const getRecommend = (id) => {
       arr.forEach((value) => {
         viewed_data.push(value);
       });
-      console.log(arr);
+      // console.log(arr);
 
       const trainData = [];
       let data_ = [];
@@ -349,6 +393,7 @@ const getRecommend = (id) => {
           }
         });
       });
+      console.log(trainData);
 
       const productByRecommend = await Promise.all(
         trainData.map(async (pro) => {

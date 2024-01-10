@@ -7,5 +7,6 @@ router.put("/update/:id", EvaluateController.updateEvaluate);
 router.get("/get-all-by-store/:id", EvaluateController.getAllByStore);
 router.get("/get-by-item", EvaluateController.getByItemOrder);
 router.delete("/delete/:id", EvaluateController.deleteEvaluate);
+// router.get("/get-count-evaluate", EvaluateController.getTotalEvaByUser);
 
 module.exports = router;

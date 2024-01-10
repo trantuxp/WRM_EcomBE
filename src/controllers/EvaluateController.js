@@ -89,6 +89,16 @@ const deleteEvaluate = async (req, res) => {
     });
   }
 };
+const getTotalEvaByUser = async (req, res) => {
+  try {
+    const response = await EvaluateService.getTotalEvaByUser();
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 
 module.exports = {
   createEvaluate,
@@ -96,4 +106,5 @@ module.exports = {
   getAllByStore,
   deleteEvaluate,
   getByItemOrder,
+  getTotalEvaByUser,
 };

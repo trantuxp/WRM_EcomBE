@@ -1,5 +1,6 @@
 const Evaluate = require("../models/EvaluateModel");
 const Product = require("../models/ProductModel");
+const { updateProduct } = require("./ProductService");
 
 const createEvaluate = (newEvaluate) => {
   return new Promise(async (resolve, reject) => {
@@ -26,6 +27,7 @@ const createEvaluate = (newEvaluate) => {
         star: Number(star),
       });
       if (newEvaluateQuery) {
+        getTotalEvaByUser(idItem);
         resolve({
           status: "OK",
           message: "SUCCESS",
@@ -146,6 +148,7 @@ const getAllByStore = (id) => {
 const getByItemOrder = (idItem, idOrder) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log("idItem, idOrder", idItem, idOrder);
       const evaluate = await Evaluate.find({
         idOrder: idOrder,
         idItem: idItem,
@@ -197,10 +200,50 @@ const deleteEvaluate = (id) => {
     }
   });
 };
+const getTotalEvaByUser = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const countEva = await Evaluate.aggregate([
+        {
+          $match: { idItem: id },
+        },
+        {
+          $group: {
+            _id: "$idItem",
+            averageStar: { $avg: "$star" },
+            totalStar: { $sum: "$star" },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            idItem: "$_id",
+            _id: 0,
+            averageStar: 1,
+            totalStar: 1,
+            count: 1,
+          },
+        },
+      ]);
+      // console.log("countEva.averageStar", countEva[0].averageStar);
+      updateProduct("657aada58b0e235c199b2d3f", {
+        rating: countEva[0].averageStar,
+      });
+      resolve({
+        status: "OK",
+        message: "count Total Evaluate success",
+        data: countEva,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 module.exports = {
   createEvaluate,
   updateEvaluate,
   getAllByStore,
   deleteEvaluate,
   getByItemOrder,
+  getTotalEvaByUser,
 };
