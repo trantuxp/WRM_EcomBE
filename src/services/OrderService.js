@@ -114,6 +114,32 @@ const getAllOrderDetails = (id) => {
     try {
       const order = await Order.find({
         user: id,
+        isDelivered: false,
+      }).sort({ createdAt: -1, updatedAt: -1 });
+      if (order === null) {
+        resolve({
+          status: "ERR",
+          message: "The order is not defined",
+        });
+      }
+
+      resolve({
+        status: "OK",
+        message: "SUCESSS",
+        data: order,
+      });
+    } catch (e) {
+      // console.log('e', e)
+      reject(e);
+    }
+  });
+};
+const getOrderByUserDelivered = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const order = await Order.find({
+        user: id,
+        isDelivered: true,
       }).sort({ createdAt: -1, updatedAt: -1 });
       if (order === null) {
         resolve({
@@ -187,20 +213,12 @@ const cancelOrderDetails = (id, data) => {
   return new Promise(async (resolve, reject) => {
     try {
       let order = [];
-      const promises = data.map(async (order) => {
-        const productData = await Product.findOneAndUpdate(
-          {
-            _id: order.product,
-            selled: { $gte: order.amount },
-          },
-          {
-            $inc: {
-              countInStock: +order.amount,
-              selled: -order.amount,
-            },
-          },
-          { new: true }
-        );
+      const data1 = [data];
+      const promises = data1.map(async (order) => {
+        const productData = await Product.findOne({
+          _id: order.product,
+          selled: { $gte: order.amount },
+        });
         if (productData) {
           order = await Order.findByIdAndDelete(id);
           if (order === null) {
@@ -226,6 +244,7 @@ const cancelOrderDetails = (id, data) => {
           message: `San pham voi id: ${newData} khong ton tai`,
         });
       }
+
       resolve({
         status: "OK",
         message: "success",
@@ -269,7 +288,7 @@ const getAllOrder = async () => {
     throw new Error("Failed to fetch order data");
   }
 };
-const getOrderByStore = (id) => {
+const getOrderByStore1 = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       // console.log("id", typeof id);
@@ -281,7 +300,9 @@ const getOrderByStore = (id) => {
         {
           $match: {
             // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
-            "orderItems.idStore": id, // Filter only 'banhmi' items
+            "orderItems.idStore": id,
+            isPaid: false, // Filter only 'banhmi' items
+            isDelivered: false, // Filter only 'banhmi' items
           },
         },
         {
@@ -292,6 +313,8 @@ const getOrderByStore = (id) => {
                 $multiply: ["$orderItems.price", "$orderItems.amount"],
               },
             },
+            id: { $first: "$_id" },
+
             user: { $first: "$user" }, // Include the user field
             shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
             paymentMethod: { $first: "$paymentMethod" },
@@ -302,6 +325,121 @@ const getOrderByStore = (id) => {
             isDelivered: { $first: "$isDelivered" },
             createdAt: { $first: "$createdAt" },
             updatedAt: { $first: "$updatedAt" },
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1, // Sắp xếp theo thứ tự giảm dần (mới nhất đầu tiên)
+          },
+        },
+      ]);
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: orders,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+const getOrderByStore2 = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // console.log("id", typeof id);
+
+      const orders = await Order.aggregate([
+        {
+          $unwind: "$orderItems", // Deconstruct the orderItems array
+        },
+        {
+          $match: {
+            // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
+            "orderItems.idStore": id,
+            isPaid: false, // Filter only 'banhmi' items
+            isDelivered: true, // Filter only 'banhmi' items
+          },
+        },
+        {
+          $group: {
+            _id: "$orderItems._id",
+            totalPrice: {
+              $sum: {
+                $multiply: ["$orderItems.price", "$orderItems.amount"],
+              },
+            },
+            id: { $first: "$_id" },
+
+            user: { $first: "$user" }, // Include the user field
+            shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
+            paymentMethod: { $first: "$paymentMethod" },
+            orderItems: { $first: "$orderItems" },
+            itemsPrice: { $first: "$itemsPrice" },
+            shippingPrice: { $first: "$shippingPrice" },
+            isPaid: { $first: "$isPaid" },
+            isDelivered: { $first: "$isDelivered" },
+            createdAt: { $first: "$createdAt" },
+            updatedAt: { $first: "$updatedAt" },
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1, // Sắp xếp theo thứ tự giảm dần (mới nhất đầu tiên)
+          },
+        },
+      ]);
+      resolve({
+        status: "OK",
+        message: "Success",
+        data: orders,
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+const getOrderByStore3 = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // console.log("id", typeof id);
+
+      const orders = await Order.aggregate([
+        {
+          $unwind: "$orderItems", // Deconstruct the orderItems array
+        },
+        {
+          $match: {
+            // _id: "657ad15ae10aec55c004bff7", // Convert the orderId to ObjectId if it's a string
+            "orderItems.idStore": id,
+            isPaid: true, // Filter only 'banhmi' items
+            isDelivered: true, // Filter only 'banhmi' items
+          },
+        },
+        {
+          $group: {
+            _id: "$orderItems._id",
+            totalPrice: {
+              $sum: {
+                $multiply: ["$orderItems.price", "$orderItems.amount"],
+              },
+            },
+            id: { $first: "$_id" },
+
+            user: { $first: "$user" }, // Include the user field
+            shippingAddress: { $first: "$shippingAddress" }, // Include the shippingAddress field
+            paymentMethod: { $first: "$paymentMethod" },
+            orderItems: { $first: "$orderItems" },
+            itemsPrice: { $first: "$itemsPrice" },
+            shippingPrice: { $first: "$shippingPrice" },
+            isPaid: { $first: "$isPaid" },
+            isDelivered: { $first: "$isDelivered" },
+            createdAt: { $first: "$createdAt" },
+            updatedAt: { $first: "$updatedAt" },
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1, // Sắp xếp theo thứ tự giảm dần (mới nhất đầu tiên)
           },
         },
       ]);
@@ -363,10 +501,13 @@ const updateStateDeliveryOrder = (id) => {
 module.exports = {
   createOrder,
   getAllOrderDetails,
+  getOrderByUserDelivered,
   getOrderDetails,
   cancelOrderDetails,
   getAllOrder,
   updateStateOrder,
   updateStateDeliveryOrder,
-  getOrderByStore,
+  getOrderByStore1,
+  getOrderByStore2,
+  getOrderByStore3,
 };

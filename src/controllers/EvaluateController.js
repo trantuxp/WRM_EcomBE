@@ -55,6 +55,24 @@ const getAllByStore = async (req, res) => {
     });
   }
 };
+const getByItem = async (req, res) => {
+  try {
+    const { idItem } = req.query;
+    console.log("idItem", idItem);
+    if (!idItem) {
+      return res.status(200).json({
+        status: "ERR",
+        message: "The productId is required",
+      });
+    }
+    const response = await EvaluateService.getByItem(idItem);
+    return res.status(200).json(response);
+  } catch (e) {
+    return res.status(404).json({
+      message: e,
+    });
+  }
+};
 const getByItemOrder = async (req, res) => {
   try {
     const { idItem, idOrder } = req.query;
@@ -107,4 +125,5 @@ module.exports = {
   deleteEvaluate,
   getByItemOrder,
   getTotalEvaByUser,
+  getByItem,
 };

@@ -5,7 +5,13 @@ const { authMiddleWareStore } = require("../middleware/authMiddleware");
 
 router.post("/create/:id", OrderController.createOrder);
 router.get("/get-order-by-user/:id", OrderController.getAllOrderDetails);
-router.get("/get-order-by-store/:id", OrderController.getOrderByStore);
+router.get(
+  "/get-order-by-user-delivered/:id",
+  OrderController.getOrderByUserDelivered
+);
+router.get("/get-order-by-store1/:id", OrderController.getOrderByStore1);
+router.get("/get-order-by-store2/:id", OrderController.getOrderByStore2);
+router.get("/get-order-by-store3/:id", OrderController.getOrderByStore3);
 router.get("/get-details-order/:id", OrderController.getDetailsOrder);
 router.delete("/cancel-order/:id", OrderController.cancelOrderDetails);
 router.get("/get-all-order", OrderController.getAllOrder);

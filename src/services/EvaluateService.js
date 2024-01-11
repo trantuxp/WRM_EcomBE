@@ -1,7 +1,8 @@
 const Evaluate = require("../models/EvaluateModel");
 const Product = require("../models/ProductModel");
+const User = require("../models/UserModel");
 const { updateProduct } = require("./ProductService");
-
+const mongoose = require("mongoose");
 const createEvaluate = (newEvaluate) => {
   return new Promise(async (resolve, reject) => {
     const { idItem, idUser, idOrder, content, star } = newEvaluate;
@@ -27,7 +28,7 @@ const createEvaluate = (newEvaluate) => {
         star: Number(star),
       });
       if (newEvaluateQuery) {
-        getTotalEvaByUser(idItem);
+        // getTotalEvaByUser(idItem);
         resolve({
           status: "OK",
           message: "SUCCESS",
@@ -69,67 +70,85 @@ const updateEvaluate = (id, data) => {
 const getAllByStore = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const evaluate = await Evaluate.aggregate([
-        // {
-        //   $lookup: {
-        //     from: "products",
-        //     localField: "idItem",
-        //     foreignField: "_id",
-        //     as: "product",
-        //   },
-        // },
-        {
-          $lookup: {
-            from: "products",
-            localField: "idItem",
-            foreignField: "_id",
-            as: "product",
-          },
-        },
-        {
-          $unwind: "$product",
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "idUser",
-            foreignField: "_id",
-            as: "user",
-          },
-        },
-        {
-          $unwind: "$user",
-        },
-      ]);
+      // const ProductByStore = await Product.find({ idStore: id }, "_id name");
 
-      const EvaluateByStore = evaluate.map(async (eva) => {
-        if (eva.product?.idStore && eva.product?.idStore !== id) {
-        } else {
-          if (eva.star > 0)
-            return {
-              _id: eva._id,
-              idItem: eva.idItem,
-              idUser: eva.idUser,
-              idOrder: eva.idOrder,
-              content: eva.content,
-              star: eva.star,
-              product: eva.product,
-              productName: eva.product.name,
-              user: eva.user,
-              userName: eva.user.name,
-              createdAt: eva.createdAt,
-              updatedAt: eva.updatedAt,
-            };
-        }
+      // const arrayOfIds = ProductByStore.map((item) => item._id.toString());
+
+      const EvaluateAll = await Evaluate.find();
+      const EvaluateByItem = EvaluateAll.map(async (eva) => {
+        const ProductByStore = await Product.find({
+          _id: eva.idItem,
+          idStore: id,
+        });
+        const userByEva = await User.find({
+          _id: eva.idUser,
+        });
+        return {
+          _id: eva._id,
+          idItem: eva.idItem,
+          idUser: eva.idUser,
+          idOrder: eva.idOrder,
+          content: eva.content,
+          star: eva.star,
+          productName: ProductByStore[0]?.name,
+          userName: userByEva[0].name,
+          createdAt: eva.createdAt,
+          updatedAt: eva.updatedAt,
+        };
       });
 
-      if (EvaluateByStore === null) {
+      // const EvaluateByItem = EvaluateAll.map(async (eva) => {
+      //   const UserByIdUser = await User.find(
+      //     { _id: eva.idUser },
+      //     "_id name email "
+      //   );
+      //   const ItemByIdItem = await Product.find({ _id: eva.idItem });
+      //   return {
+      //     _id: eva._id,
+      //     idItem: eva.idItem,
+      //     idUser: eva.idUser,
+      //     idOrder: eva.idOrder,
+      //     content: eva.content,
+      //     star: eva.star,
+      //     User: UserByIdUser,
+      //     Item: ItemByIdItem,
+      //     createdAt: eva.createdAt,
+      //     updatedAt: eva.updatedAt,
+      //   };
+      // });
+
+      // const EvaluateByStore = await Promise.all(
+      //   EvaluateByItem.map((eva) => {
+      //     const item = eva.Item;
+      //     console.log("eva.Item?.idStore eva.star", item);
+      //     if (eva.Item?.idStore && eva.Item?.idStore !== id) {
+      //     } else {
+      //       if (eva.star > 0)
+      //         return {
+      //           _id: eva._id,
+      //           idItem: eva.idItem,
+      //           idUser: eva.idUser,
+      //           idOrder: eva.idOrder,
+      //           content: eva.content,
+      //           star: eva.star,
+      //           product: eva.product,
+      //           productName: eva.Item.name,
+      //           user: eva.user,
+      //           userName: eva.User.name,
+      //           createdAt: eva.createdAt,
+      //           updatedAt: eva.updatedAt,
+      //         };
+      //     }
+      //   })
+      // );
+
+      if (EvaluateByItem === null) {
         resolve({
           status: "ERR",
           message: "The Cart is not defined",
         });
       } else {
-        resolve(await Promise.all(EvaluateByStore));
+        resolve(await Promise.all(EvaluateByItem));
       }
       // const allEvaluate = await Evaluate.find().sort({
       //   createdAt: -1,
@@ -148,7 +167,7 @@ const getAllByStore = (id) => {
 const getByItemOrder = (idItem, idOrder) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("idItem, idOrder", idItem, idOrder);
+      // console.log("idItem, idOrder", idItem, idOrder);
       const evaluate = await Evaluate.find({
         idOrder: idOrder,
         idItem: idItem,
@@ -166,13 +185,44 @@ const getByItemOrder = (idItem, idOrder) => {
           data: evaluate,
         });
       }
-      // const allEvaluate = await Evaluate.find().sort({
-      //   createdAt: -1,
-      //   updatedAt: -1,
-      // });
-      //
     } catch (e) {
       reject("loi");
+    }
+  });
+};
+const getByItem = (idItem) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("idItem", idItem);
+      const evaluate = await Evaluate.find({ idItem: idItem });
+      const EvaluateByItem = evaluate.map(async (eva) => {
+        const UserByIdUser = await User.find(
+          { _id: eva.idUser },
+          "_id name email "
+        );
+        return {
+          _id: eva._id,
+          idItem: eva.idItem,
+          idUser: eva.idUser,
+          idOrder: eva.idOrder,
+          content: eva.content,
+          star: eva.star,
+          User: UserByIdUser,
+          createdAt: eva.createdAt,
+          updatedAt: eva.updatedAt,
+        };
+      });
+
+      if (EvaluateByItem === null) {
+        resolve({
+          status: "ERR",
+          message: "The Evaluate is not defined",
+        });
+      } else {
+        resolve(await Promise.all(EvaluateByItem));
+      }
+    } catch (e) {
+      reject("err");
     }
   });
 };
@@ -246,4 +296,5 @@ module.exports = {
   deleteEvaluate,
   getByItemOrder,
   getTotalEvaByUser,
+  getByItem,
 };

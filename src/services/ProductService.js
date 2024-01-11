@@ -181,11 +181,11 @@ const getDetailsProduct = (id) => {
 };
 function searchStartsWith(query, dataArray) {
   const result = [];
-  const queryNomaly = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const queryNomaly = query.normalize("NFD").replace(/[\u0300-\u036f]/, "");
   const queryNomalylower = queryNomaly.toLowerCase();
   dataArray.map((value) => {
     // Chuẩn hóa văn bản có dấu thành không dấu
-    const value1 = value.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const value1 = value.name.normalize("NFD").replace(/[\u0300-\u036f]/, "");
     const value2 = value1.toLowerCase();
     if (value2.includes(queryNomalylower)) {
       result.push(value);
@@ -197,7 +197,7 @@ function searchStartsWith(query, dataArray) {
 
 // Sử dụng hàm tìm kiếm
 
-const getAllProductS = (limit, page, sort, filter) => {
+const getAllProductS = (limit, page, sort, filter, type1) => {
   return new Promise(async (resolve, reject) => {
     try {
       const totalProduct = await Product.countDocuments();
@@ -205,41 +205,229 @@ const getAllProductS = (limit, page, sort, filter) => {
       let allProduct = [];
 
       if (filter) {
-        console.log("filter k rong");
-        const label = filter[0];
-        const regex = new RegExp(filter[1], "i");
-        if (filter[0] === "type") {
-          const allObjectFilterType = await Product.find({ type: filter[1] })
+        if (type1) {
+          if (sort) {
+            const TotalallObject = await Product.find({
+              type: type1,
+            });
+            const TotalallObjectFilter = searchStartsWith(
+              filter,
+              TotalallObject
+            );
+            const limit1 = limit;
+            // Số trang cần bỏ qua
+            const page1 = page + 1;
+
+            // Tính vị trí bắt đầu (index) dựa trên page và limit
+            const startIndex = (page1 - 1) * limit1;
+            // console.log(TotalallObjectFilter);
+            const totalProductFilter = TotalallObjectFilter.length;
+
+            const allObjectFilterIn = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort((a, b) => a.price - b.price);
+            const allObjectFilterDe = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort((a, b) => b.price - a.price);
+            if (sort == 1) {
+              if (typeof page !== "undefined" && typeof limit !== "undefined") {
+                resolve({
+                  status: "OK",
+                  message: "Success",
+                  data: allObjectFilterIn,
+                  total: totalProductFilter,
+                  pageCurrent: Number(page + 1),
+                  totalPage: Math.ceil(totalProductFilter / limit),
+                });
+              }
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: TotalallObjectFilter,
+                total: totalProductFilter,
+              });
+            } else {
+              if (typeof page !== "undefined" && typeof limit !== "undefined") {
+                resolve({
+                  status: "OK",
+                  message: "Success",
+                  data: allObjectFilterDe,
+                  total: totalProductFilter,
+                  pageCurrent: Number(page + 1),
+                  totalPage: Math.ceil(totalProductFilter / limit),
+                });
+              }
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: TotalallObjectFilter,
+                total: totalProductFilter,
+              });
+            }
+          } else {
+            const TotalallObject = await Product.find({
+              type: type1,
+            });
+            const TotalallObjectFilter = searchStartsWith(
+              filter,
+              TotalallObject
+            );
+            const limit1 = limit;
+            // Số trang cần bỏ qua
+            const page1 = page + 1;
+
+            // Tính vị trí bắt đầu (index) dựa trên page và limit
+            const startIndex = (page1 - 1) * limit1;
+            // console.log(TotalallObjectFilter);
+            const allObjectFilter = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort(
+                (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
+              ); // Sort by createdAt and updatedAt
+
+            const totalProductFilter = TotalallObjectFilter.length;
+            if (typeof page !== "undefined" && typeof limit !== "undefined") {
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: allObjectFilter,
+                total: totalProductFilter,
+                pageCurrent: Number(page + 1),
+                totalPage: Math.ceil(totalProductFilter / limit),
+              });
+            }
+            resolve({
+              status: "OK",
+              message: "Success",
+              data: TotalallObjectFilter,
+              total: totalProductFilter,
+            });
+          }
+        } else {
+          if (sort) {
+            const TotalallObject = await Product.find();
+            const TotalallObjectFilter = searchStartsWith(
+              filter,
+              TotalallObject
+            );
+            const limit1 = limit;
+            // Số trang cần bỏ qua
+            const page1 = page + 1;
+
+            // Tính vị trí bắt đầu (index) dựa trên page và limit
+            const startIndex = (page1 - 1) * limit1;
+            // console.log(TotalallObjectFilter);
+            const totalProductFilter = TotalallObjectFilter.length;
+
+            const allObjectFilterIn = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort((a, b) => a.price - b.price);
+            const allObjectFilterDe = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort((a, b) => b.price - a.price);
+            if (sort == 1) {
+              if (typeof page !== "undefined" && typeof limit !== "undefined") {
+                resolve({
+                  status: "OK",
+                  message: "Success",
+                  data: allObjectFilterIn,
+                  total: totalProductFilter,
+                  pageCurrent: Number(page + 1),
+                  totalPage: Math.ceil(totalProductFilter / limit),
+                });
+              }
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: TotalallObjectFilter,
+                total: totalProductFilter,
+              });
+            } else {
+              if (typeof page !== "undefined" && typeof limit !== "undefined") {
+                resolve({
+                  status: "OK",
+                  message: "Success",
+                  data: allObjectFilterDe,
+                  total: totalProductFilter,
+                  pageCurrent: Number(page + 1),
+                  totalPage: Math.ceil(totalProductFilter / limit),
+                });
+              }
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: TotalallObjectFilter,
+                total: totalProductFilter,
+              });
+            }
+          } else {
+            const TotalallObject = await Product.find();
+            const TotalallObjectFilter = searchStartsWith(
+              filter,
+              TotalallObject
+            );
+            const limit1 = limit;
+            // Số trang cần bỏ qua
+            const page1 = page + 1;
+
+            // Tính vị trí bắt đầu (index) dựa trên page và limit
+            const startIndex = (page1 - 1) * limit1;
+            // console.log(TotalallObjectFilter);
+            const allObjectFilter = TotalallObjectFilter.slice(
+              (page1 - 1) * limit1,
+              startIndex + limit1
+            ) // Limit and skip
+              .sort(
+                (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
+              ); // Sort by createdAt and updatedAt
+
+            const totalProductFilter = TotalallObjectFilter.length;
+            if (typeof page !== "undefined" && typeof limit !== "undefined") {
+              resolve({
+                status: "OK",
+                message: "Success",
+                data: allObjectFilter,
+                total: totalProductFilter,
+                pageCurrent: Number(page + 1),
+                totalPage: Math.ceil(totalProductFilter / limit),
+              });
+            }
+            resolve({
+              status: "OK",
+              message: "Success",
+              data: TotalallObjectFilter,
+              total: totalProductFilter,
+            });
+          }
+        }
+      }
+      if (type1) {
+        if (sort) {
+          const sortI = Number(sort);
+          const TotalallObject = await Product.find({
+            type: type1,
+          });
+
+          const allObjectFilter = await Product.find({
+            type: type1,
+          })
             .limit(limit)
             .skip(page * limit)
-            .sort({ createdAt: -1, updated });
-          const totalProductFilterType = allObjectFilterType.length;
-          resolve({
-            status: "OK",
-            message: "Success",
-            data: allObjectFilterType,
-            total: totalProductFilterType,
-            pageCurrent: Number(page + 1),
-            totalPage: Math.ceil(totalProductFilterType / limit),
-          });
-        } else {
-          const TotalallObject = await Product.find();
-          const TotalallObjectFilter = searchStartsWith(
-            filter[1],
-            TotalallObject
-          );
+            .sort({ price: sortI })
+            .exec();
 
-          const allObjectFilter = TotalallObjectFilter.slice(
-            (page - 1) * limit,
-            page * limit
-          ) // Limit and skip
-            .sort(
-              (a, b) => b.createdAt - a.createdAt || b.updatedAt - a.updatedAt
-            ); // Sort by createdAt and updatedAt
-          // console.log("allObjectFilter:", allObjectFilter, page, limit);
-
-          const totalProductFilter = TotalallObjectFilter.length;
-          if (page && limit) {
+          const totalProductFilter = TotalallObject.length;
+          if (typeof page !== "undefined" && typeof limit !== "undefined") {
             resolve({
               status: "OK",
               message: "Success",
@@ -249,12 +437,41 @@ const getAllProductS = (limit, page, sort, filter) => {
               totalPage: Math.ceil(totalProductFilter / limit),
             });
           }
-          resolve({
-            status: "OK",
-            message: "Success",
-            data: TotalallObjectFilter,
-            total: totalProductFilter,
+          // resolve({
+          //   status: "OK",
+          //   message: "Success",
+          //   data: TotalallObject,
+          //   total: totalProductFilter,
+          // });
+        } else {
+          const TotalallObject = await Product.find({
+            type: type1,
           });
+
+          const allObjectFilter = await Product.find({
+            type: type1,
+          })
+            .limit(limit)
+            .skip(page * limit)
+            .exec();
+
+          const totalProductFilter = TotalallObject.length;
+          if (typeof page !== "undefined" && typeof limit !== "undefined") {
+            resolve({
+              status: "OK",
+              message: "Success",
+              data: allObjectFilter,
+              total: totalProductFilter,
+              pageCurrent: Number(page + 1),
+              totalPage: Math.ceil(totalProductFilter / limit),
+            });
+          } else
+            resolve({
+              status: "OK",
+              message: "Success",
+              data: TotalallObject,
+              total: totalProductFilter,
+            });
         }
       }
       if (sort) {
