@@ -43,6 +43,7 @@ const loginUser = (userLogin) => {
     try {
       const checkUser = await User.findOne({
         email: email,
+        isBlock: false,
       });
 
       if (checkUser === null) {
@@ -126,7 +127,7 @@ const deleteUser = (id) => {
         });
       }
 
-      await User.findByIdAndDelete(id);
+      await User.findByIdAndUpdate(id, { isBlock: true }, { new: true });
       resolve({
         status: "OK",
         message: "Delete user success",
@@ -155,7 +156,11 @@ const getAllUser = () => {
   return new Promise(async (resolve, reject) => {
     try {
       // const allUser = await User.find({}, { _id: 1, email: 1 }).sort({
-      const allUser = await User.find().sort({
+
+      const allUser = await User.find({
+        email: { $ne: "admin@gmail.com" },
+        isBlock: false,
+      }).sort({
         createdAt: -1,
         updatedAt: -1,
       });

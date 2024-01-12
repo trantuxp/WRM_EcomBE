@@ -33,7 +33,6 @@ const createStore = async (req, res) => {
 const getDetailsStore = async (req, res) => {
   try {
     const id = req.params.id.toString();
-    console.log("storeId", id);
     if (!id) {
       return res.status(200).json({
         status: "ERR",

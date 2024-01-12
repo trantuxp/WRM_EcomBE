@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String },
     city: { type: String },
     isStore: { type: Boolean, default: false, required: true },
+    isBlock: { type: Boolean, default: false },
   },
   {
     timestamps: true,

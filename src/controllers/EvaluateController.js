@@ -58,7 +58,6 @@ const getAllByStore = async (req, res) => {
 const getByItem = async (req, res) => {
   try {
     const { idItem } = req.query;
-    console.log("idItem", idItem);
     if (!idItem) {
       return res.status(200).json({
         status: "ERR",

@@ -11,6 +11,7 @@ const orderSchema = new mongoose.Schema(
         discount: { type: Number },
         product: { type: String, required: true },
         idStore: { type: String, required: true },
+        type: { type: String, required: true },
       },
     ],
     shippingAddress: {

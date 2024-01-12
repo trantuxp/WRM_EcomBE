@@ -258,12 +258,13 @@ const cancelOrderDetails = (id, data) => {
 
 const getAllOrder = async () => {
   try {
-    const orders = await Order.find({}, "orderItems.name user name").lean();
+    const orders = await Order.find({}, "_id user orderItems ").lean();
 
     const orderData = orders.map((order) => ({
       id: order._id,
       user: order.user,
       name: order.orderItems[0].name,
+      type: order.orderItems[0].type,
     }));
 
     const dataWithPaymentMethod = orderData.map((item) => {
@@ -276,6 +277,7 @@ const getAllOrder = async () => {
         { id: "user", title: "ID" },
         { id: "id", title: "ORDERID" },
         { id: "name", title: "interest" },
+        { id: "type", title: "type" },
       ],
     });
 

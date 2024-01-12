@@ -193,7 +193,6 @@ const getByItemOrder = (idItem, idOrder) => {
 const getByItem = (idItem) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("idItem", idItem);
       const evaluate = await Evaluate.find({ idItem: idItem });
       const EvaluateByItem = evaluate.map(async (eva) => {
         const UserByIdUser = await User.find(
