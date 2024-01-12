@@ -20,7 +20,7 @@ const createProduct = (newProduct) => {
       rating,
       description,
       discount,
-      idstore,
+      idStore,
     } = newProduct;
 
     try {
@@ -43,7 +43,7 @@ const createProduct = (newProduct) => {
         rating,
         description,
         discount: Number(discount),
-        idstore,
+        idStore,
       });
       if (newProduct) {
         resolve({

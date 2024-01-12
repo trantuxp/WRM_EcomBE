@@ -11,7 +11,7 @@ const createProduct = async (req, res) => {
       rating,
       description,
       discount,
-      idstore,
+      idStore,
     } = req.body;
 
     if (
@@ -22,7 +22,7 @@ const createProduct = async (req, res) => {
       !price ||
       !rating ||
       !discount ||
-      !idstore
+      !idStore
     ) {
       console.log(
         "ádsa",
@@ -34,7 +34,7 @@ const createProduct = async (req, res) => {
         rating,
         description,
         discount,
-        idstore
+        idStore
       );
       return res.status(200).json({
         status: "ERR",

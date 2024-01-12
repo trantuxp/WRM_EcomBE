@@ -74,7 +74,7 @@ const getAllByStore = (id) => {
 
       // const arrayOfIds = ProductByStore.map((item) => item._id.toString());
 
-      const EvaluateAll = await Evaluate.find();
+      const EvaluateAll = await Evaluate.find({ star: { $gt: 0 } });
       const EvaluateByItem = EvaluateAll.map(async (eva) => {
         const ProductByStore = await Product.find({
           _id: eva.idItem,
@@ -257,6 +257,9 @@ const getTotalEvaByUser = (id) => {
         {
           $match: { idItem: id },
         },
+        // {
+        //   $match: { star: { $gt: 0 } }, // Add this $match stage
+        // },
         {
           $group: {
             _id: "$idItem",
